@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+
+  run:
+    build: miniconda-mlflow
+    container_name: ${USER}-${MLFLOW_EXPERIMENT_NAME}-mlflow-run
+    runtime: nvidia
+    command: mlflow run ${MLFLOW_GIT_PROJECT:-/run}
+    volumes:
+      - ${MLFLOW_LOCAL_PROJECT:-empty}:/run
+      - ${MLFLOW_DATA}:/mlruns
+      - conda_envs:/opt/conda/envs
+    depends_on:
+      - server
+    environment:
+#     CUDA_VISIBLE_DEVICES: 0
+     MLFLOW_EXPERIMENT_NAME: ${MLFLOW_EXPERIMENT_NAME}
+     MLFLOW_TRACKING_URI: http://server:5000
+     DVC_REMOTE_USER: ${DVC_REMOTE_USER}
+     DVC_REMOTE_PASS: ${DVC_REMOTE_PASS}
+    networks:
+      - mlflow_bridge
+
+  server:
+    build: miniconda-mlflow
+    container_name: ${USER}-${MLFLOW_EXPERIMENT_NAME}-mlflow-server
+    command:
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --backend-store-uri
+      - file:///mlruns
+      - --default-artifact-root
+      - file:///mlruns
+    volumes:
+      - ${MLFLOW_DATA}:/mlruns
+    ports:
+      - ${MLFLOW_PORT}:5000
+    networks:
+      - mlflow_bridge
+
+volumes:
+  conda_envs:
+  empty:
+
+networks:
+  mlflow_bridge:
+    driver: bridge
