@@ -1,0 +1,8 @@
+Package: ai-cli
+Version: 1.0
+Section: base
+Priority: optional
+Architecture: all
+Maintainer: Marcel Arpogaus <marcel.arpogaus@htwg-konstanz.de>
+Description: Simplifys execution of MLFlow experiments
+ Optional long description...
