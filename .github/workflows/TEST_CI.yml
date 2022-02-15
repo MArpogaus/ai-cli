@@ -9,4 +9,7 @@ jobs:
        - name: Install AI-CLI
          run: |
            sudo make install
+       - name: RUN TESTS
+         run: |
+           bash run-tests.sh
        - run: echo "Job status ${{ job.status }}"
