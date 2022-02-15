@@ -10,5 +10,6 @@ jobs:
          run: |
            sudo make install && source /etc/environment
        - name: RUN TESTS
-         run: ./run-tests.sh
+         run: |
+           /usr/local/bin/ai-cli -h
        - run: echo "Job status ${{ job.status }}"
