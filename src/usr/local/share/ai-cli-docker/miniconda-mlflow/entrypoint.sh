@@ -1,3 +1,4 @@
+#!/bin/bash
 #    AI-CLI Simplifying AI Experiments
 #    Copyright (C) 2022  Marcel Arpogaus, Julian Jandeleit
 #
@@ -13,7 +14,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#!/bin/bash
 set -e
 
 [[ -n $GIT_USER_NAME ]] && git config --global user.name $GIT_USER_NAME
