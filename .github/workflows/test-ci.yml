@@ -10,6 +10,5 @@ jobs:
          run: |
            sudo make install && source /etc/environment
        - name: RUN TESTS
-         run: |
-            ./run-tests.sh
+         run: ./run-tests.sh
        - run: echo "Job status ${{ job.status }}"
