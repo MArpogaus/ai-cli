@@ -18,6 +18,10 @@
 # Exit on Error
 set -e
 
+echo "executed!"
+echo "stopping script"
+exit 0
+
 # Function definitions #########################################################
 show_help() {
 	DSC_PATTERN="[[:alnum:][:blank:]_\(\)\$\-]"
