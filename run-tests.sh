@@ -1,3 +1,5 @@
 #!/bin/bash
 
-ls /usr/local/bin
+ai-cli -h
+
+ai-cli status
