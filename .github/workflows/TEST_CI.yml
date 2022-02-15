@@ -11,5 +11,5 @@ jobs:
            sudo make install
        - name: RUN TESTS
          run: |
-           $(bash run-tests.sh)
+           echo $(bash run-tests.sh)
        - run: echo "Job status ${{ job.status }}"
