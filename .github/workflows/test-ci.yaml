@@ -1,7 +1,7 @@
-name: Build
+name: test-ci
 on: [push]
 jobs:
-   TEST_CI:
+   test-ci:
       runs-on: ubuntu-latest
       steps:
        - name: Check out repository code

@@ -1,5 +1,5 @@
 # AI-CLI
-![TESTCI BADGE](https://github.com/MArpogaus/ai-cli/actions/workflows/TEST_CI.yml/badge.svg)
+![TESTCI BADGE](https://github.com/MArpogaus/ai-cli/actions/workflows/test-ci.yml/badge.svg)
 ## About
 `AI-CLI` is a script, developed to simplify the execution of [MLflow Projects](https://www.mlflow.org/docs/latest/projects.html).  Whether you intend to run from a local folder structure or want to execute a remote project from a GitLab repository, both ways are supported in `ai-cli`. 
 MLflow uses docker container to manage the dependencies of different projects. 'ai-cli' manages them for you automatically and provides additional functionality for convenience to speedup your workflow.
