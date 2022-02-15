@@ -1,7 +1,7 @@
 name: Build
 on: [push]
 jobs:
-   Install:
+   TEST_CI:
       runs-on: ubuntu-latest
       steps:
        - name: Check out repository code
@@ -11,5 +11,5 @@ jobs:
            sudo make install
        - name: RUN TESTS
          run: |
-           bash run-tests.sh
+           $(bash run-tests.sh)
        - run: echo "Job status ${{ job.status }}"
