@@ -18,7 +18,7 @@
 # Exit on Error
 set -e
 
->&2 echo "something went wrong"
+echo "something went wrong"
 exit 1
 
 # Function definitions #########################################################
