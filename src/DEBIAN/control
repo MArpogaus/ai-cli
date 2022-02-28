@@ -3,7 +3,7 @@ Version: 1.0
 Section: base
 Priority: optional
 Architecture: all
-Depends: git, docker-ce, docker-ce-cli, containerd.io
+Depends: runc, containerd, docker.io
 Maintainer: Marcel Arpogaus <marcel.arpogaus@htwg-konstanz.de>
 Description: Simplifys execution of MLFlow experiments
  Optional long description...
