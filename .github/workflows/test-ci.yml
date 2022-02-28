@@ -12,6 +12,6 @@ jobs:
        - name: Execute Tests      
          id: exec-tests 
          run: |
-           echo "::set-output name=test-out::$(./run-tests.sh)\n"
-       - run: echo "Job status ${{ job.status }}"
-       - run: echo "${{ steps.exec-tests.outputs.test-out }}"
+           echo "::set-output name=test-out::$(./run-tests.sh)"
+       - name: Print Test Output
+         run: echo "${{ steps.exec-tests.outputs.*}}"
