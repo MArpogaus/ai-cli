@@ -12,6 +12,6 @@ jobs:
        - name: Execute Tests      
          id: exec-tests 
          run: |
-           "$(./run-tests.sh 2>&1 )"
+           echo "$(./run-tests.sh 2>&1 )"
        - name: Print Test Output
          run: echo "${{join(steps.exec-tests.outputs.*, ', ')}}"
