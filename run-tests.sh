@@ -5,4 +5,4 @@ echo "Check if command exists"
 type ai-cli
 
 echo "Exec status"
-ai-cli status
+echo $(ai-cli status)
