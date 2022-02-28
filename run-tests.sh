@@ -1,7 +1,8 @@
 #!/bin/bash
 set -x
 
-echo "Executing Test 1"
-ai-cli -h
+echo "Check if command exists"
+type ai-cli
 
+echo "Exec status"
 ai-cli status
