@@ -22,6 +22,7 @@ install: ## install ai-cli
 	dpkg-deb -b src
 	apt install ./src.deb
 	rm src.deb
+	apt-get -f install # fix missing
 
 uninstall: ## uninstall ai-cli
 	dpkg -r ai-cli
