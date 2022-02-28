@@ -9,8 +9,6 @@ jobs:
        - name: Install AI-CLI
          run: |
            sudo make install && source /etc/environment
-       - name: check binding
-         run : ai-cli
        - name: Execute Tests      
          id: exec-tests 
          run: |
