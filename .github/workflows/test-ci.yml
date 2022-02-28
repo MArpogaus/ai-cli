@@ -12,4 +12,6 @@ jobs:
        - name: Execute Tests      
          id: exec-tests 
          run: |
-           ./run-tests.sh
+           ./run-tests.sh > out.txt
+       - name: pdw
+         run: pdw
