@@ -18,9 +18,6 @@
 # Exit on Error
 set -e
 
-echo "something went wrong"
-exit 1
-
 # Function definitions #########################################################
 show_help() {
 	DSC_PATTERN="[[:alnum:][:blank:]_\(\)\$\-]"
