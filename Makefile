@@ -20,7 +20,7 @@ help:
 
 install: ## install ai-cli
 	dpkg-deb -b src
-	dpkg -i src.deb
+	apt install ./src.deb
 	rm src.deb
 
 uninstall: ## uninstall ai-cli
