@@ -13,5 +13,3 @@ jobs:
          id: exec-tests 
          run: |
            ./run-tests.sh
-       - name: Print Test Output
-         run: echo "${{join(steps.exec-tests.outputs.*, ', ')}}"
