@@ -2,8 +2,8 @@
 set -e
 
 # install docker
-type docker
-#curl -fsSL https://get.docker.com -o get-docker.sh
-#sudo sh get-docker.sh
-
-
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+apt update
+apt-cache policy docker-ce
+apt install docker-ce
+systemctl status docker
