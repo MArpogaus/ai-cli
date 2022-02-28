@@ -12,12 +12,12 @@ jobs:
        - name: Execute Tests      
          id: exec-tests 
          run: |
-           ./run-tests.sh > out.txt
+           ./run-tests.sh 1> stdout.txt 2> stderr.txt
          continue-on-error: true
-       - name: pwd
-         run: pwd
-       - name: print output
-         run: cat out.txt
+       - name: show stdout
+         run: cat stdout.txt
+       - name: show stderr
+         run: cat stderr.txt
        - name: check on failures
          if : steps.exec-tests.outcome != 'success'
          run: exit 1

@@ -1,11 +1,13 @@
 #!/bin/bash
-#set -x
 
 echo "Check if command exists"
 type ai-cli
 
 echo "exec init"
-ai-cli init
+bash -x ai-cli init
 
 echo "exec help"
-ai-cli -h
+bash -x ai-cli -h
+
+echo "exec status"
+bash -x ai-cli status
