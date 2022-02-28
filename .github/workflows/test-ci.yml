@@ -7,7 +7,7 @@ jobs:
        - name: Check out repository code
          uses: actions/checkout@v2
        - name: Update apt
-         run: apt-get update && apt-get upgrade
+         run: sudo apt-get update && sudo apt-get upgrade
        - name: Install AI-CLI
          run: |
            sudo make install && source /etc/environment
