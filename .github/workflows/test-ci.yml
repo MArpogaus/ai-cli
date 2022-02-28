@@ -14,4 +14,4 @@ jobs:
          run: |
            echo "::set-output name=test-out::$(./run-tests.sh 2>&1 )"
        - name: Print Test Output
-         run: echo "${{steps.exec-tests.outputs.test-out}}"
+         run: echo "${{join(steps.exec-tests.outputs.test-out, \n)}}"
