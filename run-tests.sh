@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 
 echo "Check if command exists"
 type ai-cli
