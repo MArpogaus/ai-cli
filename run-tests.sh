@@ -4,5 +4,5 @@
 echo "Check if command exists"
 type ai-cli
 
-echo "Init"
-echo $(ai-cli init)
+echo "exec Init"
+ai-cli init
