@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Exit on Error
-set -e
+set -ex
 
 # Function definitions #########################################################
 show_help() {
