@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -e
+
 echo "setting up prerequisites for testing"
 
 # start docker
-service docker start
+sudo service docker start
 
 # setup git
 git config --global user.name "git-dummy-name"
