@@ -20,7 +20,6 @@ help:
 
 install: ## install ai-cli
 	dpkg-deb -b src
-	./install-requirements
 	dpkg -i src.deb
 	rm src.deb
 
