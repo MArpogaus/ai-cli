@@ -6,8 +6,8 @@ jobs:
       steps:
        - name: Check out repository code
          uses: actions/checkout@v2
-       - name: Install Prerequisites
-         run: sudo ./install-prerequisites-manually.sh
+       - name: Setup Prerequisites for Test
+         run: sudo ./install-prerequisites-manually.sh && ./setup-for-tests.sh
        - name: Install AI-CLI
          run: |
            sudo make install && source /etc/environment
