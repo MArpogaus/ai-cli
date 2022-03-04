@@ -3,7 +3,7 @@ Version: 1.0
 Section: base
 Priority: optional
 Architecture: all
-Depends: docker-ce
+Depends: git, docker-ce
 Maintainer: Marcel Arpogaus <marcel.arpogaus@htwg-konstanz.de>
 Description: Simplifys execution of MLFlow experiments
  Optional long description...
