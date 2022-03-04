@@ -2,9 +2,6 @@
 
 echo "setting up prerequisites for testing"
 
-# check for gpu
-lspci | grep -i nvidia
-
 # start docker
 service docker start
 
