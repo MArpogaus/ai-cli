@@ -324,9 +324,6 @@ NOTEBOOK_VIRTUAL_HOST=${USER}-notebook.$URLNAME
 LAB_VIRTUAL_HOST=${USER}-lab.$URLNAME
 DOCKER_WORKSPACE="$(docker images -qf "reference=${USER}-workspace_workspace")"
 
-echo "reched here"
-exit 1
-
 # CLI args defaults
 GPUS=0,1
 
