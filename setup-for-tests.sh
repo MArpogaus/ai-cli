@@ -4,6 +4,8 @@ echo "setting up prerequisites for testing"
 
 # check for gpu
 lspci | grep VGA
+apt install nvidia-smi
+nvidia-smi
 
 # start docker
 service docker start
