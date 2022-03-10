@@ -27,4 +27,4 @@ uninstall: ## uninstall ai-cli
 	dpkg -r ai-cli
 
 check: ## run tests for ai-cli
-	run-tests.sh
+	./CI/run-tests.sh

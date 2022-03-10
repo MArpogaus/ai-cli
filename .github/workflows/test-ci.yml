@@ -7,14 +7,14 @@ jobs:
        - name: Check out repository code
          uses: actions/checkout@v2
        - name: Setup Prerequisites for Test
-         run: sudo ./install-prerequisites-manually.sh && ./setup-for-tests.sh
+         run: sudo ./CI/install-prerequisites-manually.sh && ./CI/setup-for-tests.sh
        - name: Install AI-CLI
          run: |
            sudo make install && source /etc/environment
        - name: Execute Tests      
          id: exec-tests 
          run: |
-           ./run-tests.sh 1> stdout.txt 2> stderr.txt
+           ./CI/run-tests.sh 1> stdout.txt 2> stderr.txt
          continue-on-error: true
        - name: show stdout
          run: cat stdout.txt
