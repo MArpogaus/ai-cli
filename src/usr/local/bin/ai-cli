@@ -323,6 +323,7 @@ JUPYTER_CONTAINER=$(docker ps -qf name=".*jupyter.*")
 NOTEBOOK_VIRTUAL_HOST=${USER}-notebook.$URLNAME
 LAB_VIRTUAL_HOST=${USER}-lab.$URLNAME
 DOCKER_WORKSPACE="$(docker images -qf "reference=${USER}-workspace_workspace")"
+IMAGE_TAG="default"
 
 # CLI args defaults
 GPUS=0,1
@@ -390,6 +391,10 @@ done
 shift $((OPTIND-1))
 GPUS=${OPT_GPUS:-$GPUS}
 
+# build image name from repo prefix and tag
+IMAGE_PREFIX=ai-cli/${USER}
+IMAGE_NAME=${IMAGE_PREFIX}:${IMAGE_TAG}
+
 # CLI args for docker-compose run
 RUN_ARGS="--rm"
 RUN_ARGS+=" --user $DOCKER_USER"
@@ -405,11 +410,12 @@ fi
 if [[ -e $MLFLOW_ENV_FILE ]]; then
 	export MLFLOW_ENV_FILE
 fi
+
 export MLFLOW_DATA=/mnt/data/$USER/mlflow
 export DOCKER_USER
 export GIT_USER_NAME
 export GIT_USER_EMAIL
-
+export IMAGE_NAME
 # Run command ##################################################################
 if [[ $# == 0 ]]; then
 	show_help && exit 1
@@ -446,7 +452,7 @@ case ${CMD} in
 		echo "mlflow data ${MLFLOW_DATA}"
 		# fix docker wsl network problems:  docker run --dns 8.8.8.8 COMMAND (https://medium.com/@faithfulanere/solved-docker-build-could-not-resolve-archive-ubuntu-com-apt-get-fails-to-install-anything-9ea4dfdcdcf2)
 		# fix for build: https://stackoverflow.com/questions/44184496/configuring-options-for-docker-run/44184773#44184773
-		docker build -t ai-cli/${USER}:${IMAGE_TAG} /usr/local/share/ai-cli-docker/jupyter/
+		docker build -t ${IMAGE_NAME} /usr/local/share/ai-cli-docker/jupyter/
 		#docker-compose --file src/usr/local/share/ai-cli-docker/server.docker-compose.yaml up --build
 		echo "Build Finished"
 		;;

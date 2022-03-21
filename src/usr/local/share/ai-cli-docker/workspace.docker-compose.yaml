@@ -24,7 +24,6 @@ services:
         CUDA_VERSION: ${CUDA_VERSION}
     user: $DOCKER_USER
     container_name: ${USER}-mlflow-run
-    runtime: nvidia
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
@@ -41,13 +40,9 @@ services:
       - mlflow_bridge
 
   jupyter:
-    build:
-      context: /usr/local/share/ai-cli-docker/jupyter
-      args:
-        CUDA_VERSION: ${CUDA_VERSION}   
+    image: $IMAGE_NAME
     user: $DOCKER_USER
     container_name: ${USER}-jupyter
-    runtime: nvidia
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
