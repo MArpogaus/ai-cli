@@ -14,8 +14,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-ARG CUDA_VERSION
-FROM jupyter/base-notebook:latest
+FROM jupyter/base-notebook:ubuntu-20.04
 USER root
 
 ENV DEBIAN_FRONTEND=noninteractive

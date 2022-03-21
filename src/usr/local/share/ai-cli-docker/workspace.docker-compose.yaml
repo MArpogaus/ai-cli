@@ -19,7 +19,7 @@ services:
 
   workspace:
     build:
-      context: /usr/local/share/ai-cli-docker/miniconda-mlflow
+      context: /usr/local/share/ai-cli-docker/mlflow
       args:
         CUDA_VERSION: ${CUDA_VERSION}
     user: $DOCKER_USER
@@ -42,7 +42,7 @@ services:
 
   jupyter:
     build:
-      context: /usr/local/share/ai-cli-docker/miniconda-mlflow
+      context: /usr/local/share/ai-cli-docker/jupyter
       args:
         CUDA_VERSION: ${CUDA_VERSION}   
     user: $DOCKER_USER

@@ -1,3 +1,4 @@
+#!/bin/bash
 #    AI-CLI Simplifying AI Experiments
 #    Copyright (C) 2022  Marcel Arpogaus, Julian Jandeleit
 #
@@ -13,34 +14,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-version: '3'
+set -e
 
-services:
+[[ -n $GIT_USER_NAME ]] && git config --global user.name $GIT_USER_NAME
+[[ -n $GIT_USER_EMAIL ]] && git config --global user.email $GIT_USER_EMAIL
 
-  server:
-    build: 
-      context: /usr/local/share/ai-cli-docker/mlflow 
-      args:
-        CUDA_VERSION: ${CUDA_VERSION}
-    user: $DOCKER_USER
-    container_name: ${USER}-mlflow-server
-    command:
-      - ls 
-    volumes:
-      - ${MLFLOW_DATA}:/mlruns
-    environment:
-      VIRTUAL_HOST: ${USER}-mlflow.${URLNAME}
-      VIRTUAL_PORT: ${MLFLOWPORT}
-      SSL_POLICY: Mozilla-Modern
-      HSTS: 'max-age=31536000; includeSubDomains; preload'
-      CERT_NAME: shared
-    networks:
-      - mlflow_bridge
-      - proxy_net
-
-networks:
-  mlflow_bridge:
-    external: true
-    name: ${USER}_mlflow_bridge
-  proxy_net:
-    external: true
+exec "$@"

@@ -340,7 +340,7 @@ HOME_PATH="/home/${USER}/.local/share/ai-cli/home"
 
 # CLI Arguments ################################################################
 RUN_VOLUMES=()
-while getopts :he:g:n:c:v: flag
+while getopts :he:g:n:c:v:i: flag
 do
 	case "${flag}" in
 		v)  # Specify additional docker @VOLUME@s
@@ -381,6 +381,9 @@ do
 			fi
 			
 			CUDA_VERSION=${OPTARG};;
+		i) # Specify image tag to be used
+			IMAGE_TAG="${OPTARG}"
+		;;
 		*) show_help && exit 0;;
 	esac
 done
@@ -441,13 +444,9 @@ case ${CMD} in
 		CUDA_VERSION="11.2.1"
 		export CUDA_VERSION
 		echo "mlflow data ${MLFLOW_DATA}"
-		if [[ "$(id -u)" -ne 0 ]]; then
-			echo "Please run as root"
-			#exit
-		fi
 		# fix docker wsl network problems:  docker run --dns 8.8.8.8 COMMAND (https://medium.com/@faithfulanere/solved-docker-build-could-not-resolve-archive-ubuntu-com-apt-get-fails-to-install-anything-9ea4dfdcdcf2)
 		# fix for build: https://stackoverflow.com/questions/44184496/configuring-options-for-docker-run/44184773#44184773
-		docker build -t ai-cli/${USER}:test2 /usr/local/share/ai-cli-docker/miniconda-mlflow/
+		docker build -t ai-cli/${USER}:${IMAGE_TAG} /usr/local/share/ai-cli-docker/jupyter/
 		#docker-compose --file src/usr/local/share/ai-cli-docker/server.docker-compose.yaml up --build
 		echo "Build Finished"
 		;;
