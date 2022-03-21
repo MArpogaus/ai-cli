@@ -414,7 +414,8 @@ else
 	CMD=$1
 	shift
 fi
-
+CUDA_VERSION="11.2.1"
+export CUDA_VERSION
 case ${CMD} in
 	init) # initialize ai-cli for your user
 		init;;
@@ -436,6 +437,20 @@ case ${CMD} in
 		export CUDA_VERSION
 		dc server build --pull
 		dc workspace build --pull ;;
+	build) # build image from dockerfile
+		CUDA_VERSION="11.2.1"
+		export CUDA_VERSION
+		echo "mlflow data ${MLFLOW_DATA}"
+		if [[ "$(id -u)" -ne 0 ]]; then
+			echo "Please run as root"
+			#exit
+		fi
+		# fix docker wsl network problems:  docker run --dns 8.8.8.8 COMMAND (https://medium.com/@faithfulanere/solved-docker-build-could-not-resolve-archive-ubuntu-com-apt-get-fails-to-install-anything-9ea4dfdcdcf2)
+		# fix for build: https://stackoverflow.com/questions/44184496/configuring-options-for-docker-run/44184773#44184773
+		docker build -t ai-cli/${USER}:test2 /usr/local/share/ai-cli-docker/miniconda-mlflow/
+		#docker-compose --file src/usr/local/share/ai-cli-docker/server.docker-compose.yaml up --build
+		echo "Build Finished"
+		;;
 	bash) # start bash shell inside ai-cli container
 		export MLFLOW_LOCAL_PROJECT
 		docker_run workspace bash ;;
