@@ -314,6 +314,8 @@ export URLNAME
 
 MLFLOW_LOCAL_PROJECT="$PWD"
 DOCKER_USER=$(id -u):$(id -g)
+NB_UID=$(id -u)
+NB_GID=$(id -g)
 GIT_USER_NAME="'$(git config --get user.name)'"
 GIT_USER_EMAIL="$(git config --get user.email)"
 MLFLOW_VIRTUAL_HOST=${USER}-mlflow.$URLNAME
@@ -323,7 +325,11 @@ JUPYTER_CONTAINER=$(docker ps -qf name=".*jupyter.*")
 NOTEBOOK_VIRTUAL_HOST=${USER}-notebook.$URLNAME
 LAB_VIRTUAL_HOST=${USER}-lab.$URLNAME
 DOCKER_WORKSPACE="$(docker images -qf "reference=${USER}-workspace_workspace")"
+
+# build image name from repo prefix and tag
 IMAGE_TAG="default"
+IMAGE_PREFIX=ai-cli/${USER}
+IMAGE_NAME=${IMAGE_PREFIX}:${IMAGE_TAG}
 
 # CLI args defaults
 GPUS=0,1
@@ -382,8 +388,8 @@ do
 			fi
 			
 			CUDA_VERSION=${OPTARG};;
-		i) # Specify image tag to be used
-			IMAGE_TAG="${OPTARG}"
+		i) # Specify image to be used
+			IMAGE_NAME="${OPTARG}"
 		;;
 		*) show_help && exit 0;;
 	esac
@@ -391,13 +397,9 @@ done
 shift $((OPTIND-1))
 GPUS=${OPT_GPUS:-$GPUS}
 
-# build image name from repo prefix and tag
-IMAGE_PREFIX=ai-cli/${USER}
-IMAGE_NAME=${IMAGE_PREFIX}:${IMAGE_TAG}
-
 # CLI args for docker-compose run
 RUN_ARGS="--rm"
-RUN_ARGS+=" --user $DOCKER_USER"
+#RUN_ARGS+=" --user $DOCKER_USER"
 RUN_ARGS+=" -e CUDA_VISIBLE_DEVICES=$GPUS"
 for v in ${RUN_VOLUMES[@]}; do
 	RUN_ARGS+=" -v $v"
@@ -413,6 +415,8 @@ fi
 
 export MLFLOW_DATA=/mnt/data/$USER/mlflow
 export DOCKER_USER
+export NB_UID
+export NB_GID
 export GIT_USER_NAME
 export GIT_USER_EMAIL
 export IMAGE_NAME
@@ -423,6 +427,7 @@ else
 	CMD=$1
 	shift
 fi
+echo "INFO: Using image ${IMAGE_NAME}"
 CUDA_VERSION="11.2.1"
 export CUDA_VERSION
 case ${CMD} in
@@ -472,7 +477,8 @@ case ${CMD} in
 		export MLFLOW_LOCAL_PROJECT
 		echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
 		echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-		docker_run jupyter $JUPYTER_LAB_CMD ;;
+		#docker_run jupyter $JUPYTER_LAB_CMD ;;
+		docker_run jupyter $JUPYTER_LAB_CMD;;
 	exec) # execute @PROGRAMM inside ai-cli container
 		if [[ $# == 0 ]]; then
 			echo "ERROR: Please provide a program name as argument"
@@ -494,7 +500,7 @@ case ${CMD} in
 		fi
 		export MLFLOW_LOCAL_PROJECT
 		echo "INFO: Running MLProject from $MLFLOW_LOCAL_PROJECT"
-		docker_run workspace  mlflow run $* ;;
+		docker_run workspace mlflow run $* ;;
 	run-from-git) # run MLProject from git repo at @URI inside ai-cli container
 		if [[ $# != 0 && -z $MLFLOW_GIT_PROJECT ]]; then
 			MLFLOW_GIT_PROJECT=$1

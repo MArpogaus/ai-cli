@@ -18,11 +18,8 @@ version: '3'
 services:
 
   workspace:
-    build:
-      context: /usr/local/share/ai-cli-docker/mlflow
-      args:
-        CUDA_VERSION: ${CUDA_VERSION}
-    user: $DOCKER_USER
+    image: $IMAGE_NAME
+    user: ${DOCKER_USER}
     container_name: ${USER}-mlflow-run
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
@@ -32,8 +29,13 @@ services:
       - /etc/group:/etc/group:ro
     environment:
      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
-     GIT_USER_NAME: $GIT_USER_NAME
-     GIT_USER_EMAIL: $GIT_USER_EMAIL
+     # GIT_USER_NAME: $GIT_USER_NAME
+     # GIT_USER_EMAIL: $GIT_USER_EMAIL
+     NB_USER: ${USER}
+     NB_UID: ${NB_UID}
+     NB_GID: ${NB_GID}
+     HOME: /home/${USER}
+    working_dir: /home/${USER}
     env_file:
       - ${MLFLOW_ENV_FILE:-/usr/local/share/ai-cli-docker/run.env}
     networks:
@@ -41,8 +43,9 @@ services:
 
   jupyter:
     image: $IMAGE_NAME
-    user: $DOCKER_USER
-    container_name: ${USER}-jupyter
+    user: ${DOCKER_USER}
+    container_name: ${USER}-jupyter 
+    working_dir: /home/${USER}
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
@@ -50,16 +53,18 @@ services:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
     environment:
+      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
+      # GIT_USER_NAME: $GIT_USER_NAME
+      # GIT_USER_EMAIL: $GIT_USER_EMAIL
+      NB_USER: ${USER}
+      NB_UID: ${NB_UID}
+      NB_GID: ${NB_GID}
+      HOME: /home/${USER}
       VIRTUAL_HOST: ${JUPYTER_VIRTUAL_HOST}
       VIRTUAL_PORT: ${JUPYTERPORT}
       SSL_POLICY: Mozilla-Modern
       HSTS: 'max-age=31536000; includeSubDomains; preload'
       CERT_NAME: shared
-      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
-      GIT_USER_NAME: $GIT_USER_NAME
-      GIT_USER_EMAIL: $GIT_USER_EMAIL
-    env_file:
-      - ${MLFLOW_ENV_FILE:-/usr/local/share/ai-cli-docker/run.env}
     networks:
       - mlflow_bridge
       - proxy_net

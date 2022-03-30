@@ -20,8 +20,6 @@ services:
   server:
     build: 
       context: /usr/local/share/ai-cli-docker/mlflow 
-      args:
-        CUDA_VERSION: ${CUDA_VERSION}
     user: $DOCKER_USER
     container_name: ${USER}-mlflow-server
     command:
