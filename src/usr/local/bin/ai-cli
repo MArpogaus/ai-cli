@@ -314,8 +314,8 @@ export URLNAME
 
 MLFLOW_LOCAL_PROJECT="$PWD"
 DOCKER_USER=$(id -u):$(id -g)
-GIT_USER_NAME="'$(git config --get user.name)'"
-GIT_USER_EMAIL="$(git config --get user.email)"
+GIT_USER_NAME="$(git config --default no-name --get user.name)"
+GIT_USER_EMAIL="$(git config --default no-mail --get user.email)"
 MLFLOW_VIRTUAL_HOST=${USER}-mlflow.$URLNAME
 JUPYTER_CMD="jupyter notebook --notebook-dir=/app --ip 0.0.0.0 --no-browser"
 JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser"
