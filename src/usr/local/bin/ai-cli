@@ -59,11 +59,13 @@ show_help() {
 }
 
 dc(){
+	set -x
 	FILE=$1
 	shift
 	docker-compose --project-name $USER-$FILE \
 		--file "${DOCKER_COMPOSE_PATH}/${FILE}.docker-compose.yaml" \
 		$*
+	set +x
 }
 
 docker_run(){
@@ -75,6 +77,7 @@ docker_run(){
 }
 
 basic_auth(){
+	echo "INFO:     basic_auth ${HTPASSWD_PATH} -- $1"
 	# Create htpasswd for Basic Auth
 	if [[ ! -e ${HTPASSWD_PATH}/$1 ]]; then
 		echo "Please enter a username and password to restrict access to: $1"
@@ -98,6 +101,8 @@ init(){
 	docker network create ${USER}_mlflow_bridge &> /dev/null || true # to continue if already exists
 	echo "INFO: init ${HOME_PATH}"
 	mkdir -p ${HOME_PATH}
+	echo "INFO: init jupyter path"
+	mkdir -p "/home/${USER}/.local/share/ai-cli/conda/share/jupyter/lab/extensions"
 	echo "INFO: Initialization complete"	
 }
 check_init(){
@@ -457,7 +462,7 @@ case ${CMD} in
 		echo "mlflow data ${MLFLOW_DATA}"
 		# fix docker wsl network problems:  docker run --dns 8.8.8.8 COMMAND (https://medium.com/@faithfulanere/solved-docker-build-could-not-resolve-archive-ubuntu-com-apt-get-fails-to-install-anything-9ea4dfdcdcf2)
 		# fix for build: https://stackoverflow.com/questions/44184496/configuring-options-for-docker-run/44184773#44184773
-		docker build -t ${IMAGE_NAME} /usr/local/share/ai-cli-docker/jupyter/
+		docker build -t ${IMAGE_NAME} --build-arg=ARG_NB_USER="$USER" --build-arg=ARG_NB_UID="$NB_UID" --build-arg=ARG_NB_GID="$NB_GID" --build-arg=ARG_HOME="/home/${USER}" /usr/local/share/ai-cli-docker/jupyter/
 		#docker-compose --file src/usr/local/share/ai-cli-docker/server.docker-compose.yaml up --build
 		echo "Build Finished"
 		;;
@@ -511,5 +516,9 @@ case ${CMD} in
 		fi
 		echo "INFO: Running MLProject from $MLFLOW_GIT_PROJECT" 
 		docker_run workspace mlflow run $MLFLOW_GIT_PROJECT ;;
+	reset-password) # Reset Password for mlflow you will setup a new one at next server start
+		rm "${HTPASSWD_PATH}/${MLFLOW_VIRTUAL_HOST}"
+		echo "successfully reset password"
+		;;
 	*) show_help && exit 1;;
 esac

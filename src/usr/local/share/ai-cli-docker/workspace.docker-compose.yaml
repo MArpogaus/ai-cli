@@ -25,16 +25,13 @@ services:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
       - /home/${USER}/.local/share/ai-cli/home:/home/${USER}/
+      - /home/${USER}/.local/share/ai-cli/jupyter/lab/extensions:/opt/conda/share/jupyter/lab/extensions
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
     environment:
      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
      # GIT_USER_NAME: $GIT_USER_NAME
      # GIT_USER_EMAIL: $GIT_USER_EMAIL
-     NB_USER: ${USER}
-     NB_UID: ${NB_UID}
-     NB_GID: ${NB_GID}
-     HOME: /home/${USER}
     working_dir: /home/${USER}
     env_file:
       - ${MLFLOW_ENV_FILE:-/usr/local/share/ai-cli-docker/run.env}
@@ -50,16 +47,13 @@ services:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
       - /home/${USER}/.local/share/ai-cli/home:/home/${USER}/
+      - /home/${USER}/.local/share/ai-cli/jupyter/lab/extensions:/opt/conda/share/jupyter/lab/extensions
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
     environment:
       MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
       # GIT_USER_NAME: $GIT_USER_NAME
       # GIT_USER_EMAIL: $GIT_USER_EMAIL
-      NB_USER: ${USER}
-      NB_UID: ${NB_UID}
-      NB_GID: ${NB_GID}
-      HOME: /home/${USER}
       VIRTUAL_HOST: ${JUPYTER_VIRTUAL_HOST}
       VIRTUAL_PORT: ${JUPYTERPORT}
       SSL_POLICY: Mozilla-Modern

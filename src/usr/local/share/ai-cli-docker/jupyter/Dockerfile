@@ -1,4 +1,3 @@
-#!/bin/bash
 #    AI-CLI Simplifying AI Experiments
 #    Copyright (C) 2022  Marcel Arpogaus, Julian Jandeleit
 #
@@ -16,22 +15,30 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 FROM jupyter/minimal-notebook:ubuntu-20.04
 
-ENV DEBIAN_FRONTEND=noninteractive
+# switch to root to fix permissions for local user
+USER root
 
-ENV CONDA_DIR=/opt/conda \
-    SHELL=/bin/bash
-ENV PATH="${CONDA_DIR}/bin:${PATH}"
+ARG ARG_NB_USER \
+    ARG_NB_UID \
+    ARG_NB_GID \
+    ARG_HOME
+
+ENV NB_USER=${ARG_NB_USER} \
+    NB_UID=${ARG_NB_UID} \
+    NB_GID=${ARG_NB_GID} \
+    HOME=${ARG_HOME} \
+    MLFLOW_CONDA_CREATE_ENV_CMD=mamba
 
 RUN set -x && \
     mamba install --quiet --yes \
-    'mlflow' && \
+    'mlflow' \
+    'nb_conda_kernels' && \
     mamba clean --all -f -y
 
-RUN fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
+RUN echo "${CONDA_DIR}"
 
-# Use Mamaba for mlflow envs
-# export would not persist image generation: https://stackoverflow.com/questions/39597925/how-do-i-set-environment-variables-during-the-build-in-docker
-ENV MLFLOW_CONDA_CREATE_ENV_CMD=mamba
+RUN fix-permissions "${CONDA_DIR}"
 
-# Switch back to jovyan to avoid accidental container runs as root
+# Switch user to avoid accidental container runs as root
+USER $NB_USER
+

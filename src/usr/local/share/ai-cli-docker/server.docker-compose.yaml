@@ -23,7 +23,14 @@ services:
     user: $DOCKER_USER
     container_name: ${USER}-mlflow-server
     command:
-      - ls 
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --backend-store-uri
+      - file:///mlruns
+      - --default-artifact-root
+      - file:///mlruns
     volumes:
       - ${MLFLOW_DATA}:/mlruns
     environment:
