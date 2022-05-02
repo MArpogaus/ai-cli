@@ -25,7 +25,7 @@ services:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
       - /home/${USER}/.local/share/ai-cli/home:/home/${USER}/
-      - /home/${USER}/.local/share/ai-cli/jupyter/lab/extensions:/opt/conda/share/jupyter/lab/extensions
+      - ${EXTENSION_PATH}:/opt/conda/share/jupyter/lab/extensions
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
     environment:

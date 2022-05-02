@@ -101,8 +101,8 @@ init(){
 	docker network create ${USER}_mlflow_bridge &> /dev/null || true # to continue if already exists
 	echo "INFO: init ${HOME_PATH}"
 	mkdir -p ${HOME_PATH}
-	echo "INFO: init jupyter path"
-	mkdir -p "/home/${USER}/.local/share/ai-cli/conda/share/jupyter/lab/extensions"
+	echo "INFO: init ${EXTENSION_PATH}"
+	mkdir -p $EXTENSION_PATH
 	echo "INFO: Initialization complete"	
 }
 check_init(){
@@ -150,7 +150,15 @@ disambiguate_host(){
 	hname=$1
 	instances=""
 	if [ -n "$JUPYTER_CONTAINER" ]; then
-		hosts=$( echo "$JUPYTER_CONTAINER" | xargs docker inspect -f "{{(index .Config.Env 0)}}")
+		hosts=$( echo "$JUPYTER_CONTAINER" | xargs docker inspect -f "                
+		{{range .Config.Env }}
+                        {{with $line := (split . "=")}}
+                                {{if eq (index . 0) "VIRTUAL_HOST"}}
+                                        {{ index . 1 }}
+                                {{end}}
+                        {{end}}
+                {{end}}
+		")
 		# instances from same user with same name
 		# cat is needed to prevent exit on negative result
 		# note that expected format is hardcoded here
@@ -344,6 +352,7 @@ GPUS=0,1
 # The init method fixes issues that can be solved automatically. This is necessary
 # setup user workspace before first use.
 HOME_PATH="/home/${USER}/.local/share/ai-cli/home"
+EXTENSION_PATH="/home/${USER}/.local/share/ai-cli/extensions"
 [ "$1" = init ] || check_init || {
 	v=$?
 	echo "ERROR: Uninitialized. You may want to run ai-cli init and try again."
@@ -425,6 +434,7 @@ export NB_GID
 export GIT_USER_NAME
 export GIT_USER_EMAIL
 export IMAGE_NAME
+export EXTENSION_PATH
 # Run command ##################################################################
 if [[ $# == 0 ]]; then
 	show_help && exit 1
