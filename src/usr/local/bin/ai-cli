@@ -515,6 +515,7 @@ case ${CMD} in
 		fi
 		export MLFLOW_LOCAL_PROJECT
 		echo "INFO: Running MLProject from $MLFLOW_LOCAL_PROJECT"
+		echo "INFO: Executed Command:  mlflow run $*"
 		docker_run workspace mlflow run $* ;;
 	run-from-git) # run MLProject from git repo at @URI inside ai-cli container
 		if [[ $# != 0 && -z $MLFLOW_GIT_PROJECT ]]; then

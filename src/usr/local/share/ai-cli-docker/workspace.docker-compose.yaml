@@ -32,7 +32,7 @@ services:
      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
      # GIT_USER_NAME: $GIT_USER_NAME
      # GIT_USER_EMAIL: $GIT_USER_EMAIL
-    working_dir: /home/${USER}
+    working_dir: /app
     env_file:
       - ${MLFLOW_ENV_FILE:-/usr/local/share/ai-cli-docker/run.env}
     networks:

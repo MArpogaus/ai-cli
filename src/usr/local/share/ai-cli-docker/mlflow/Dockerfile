@@ -33,7 +33,6 @@ RUN apt-get update -q && \
 ENV PYTHONUNBUFFERED=1
 RUN set -x && pip install mlflow
 
-# Install python/pipd, git credentials
 ADD entrypoint.sh /entrypoint.sh
 
 WORKDIR /app
