@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #    AI-CLI Simplifying AI Experiments
 #    Copyright (C) 2022  Marcel Arpogaus, Julian Jandeleit
 #
@@ -15,8 +15,5 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 set -ex
-
-[[ -n $GIT_USER_NAME ]] && git config --global user.name $GIT_USER_NAME
-[[ -n $GIT_USER_EMAIL ]] && git config --global user.email $GIT_USER_EMAIL
 
 exec "$@"

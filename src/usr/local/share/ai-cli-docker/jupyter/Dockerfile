@@ -21,7 +21,8 @@ USER root
 ARG ARG_NB_USER \
     ARG_NB_UID \
     ARG_NB_GID \
-    ARG_HOME
+    ARG_HOME \
+    ARG_INSTALL_CUDA
 
 ENV NB_USER=${ARG_NB_USER} \
     NB_UID=${ARG_NB_UID} \
@@ -35,7 +36,19 @@ RUN set -x && \
     'nb_conda_kernels' && \
     mamba clean --all -f -y
 
-RUN echo "${CONDA_DIR}"
+
+RUN set -x && if [[ -z "$ARG_INSTALL_CUDA" ]] ; then echo "Not installing Cuda" ; else \
+    echo "Argument is $ARG_INSTALL_CUDA, installing Cuda\n" && \
+    apt-get update && apt-get -y install gnupg software-properties-common && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
+    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    apt-key adv --batch --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub && \
+    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" && \
+    apt-get update && \
+    apt-get -y install cuda-drivers-470 cuda-runtime-11-2 cuda-demo-suite-11-2 cuda-11-2 && \
+    apt-get install -y libcudnn8 && \
+    apt-get install -y libcudnn8-dev \
+    ; fi
 
 RUN fix-permissions "${CONDA_DIR}"
 

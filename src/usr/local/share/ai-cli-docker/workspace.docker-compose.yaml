@@ -21,6 +21,7 @@ services:
     image: $IMAGE_NAME
     user: ${DOCKER_USER}
     container_name: ${USER}-mlflow-run
+    runtime: ${RUNTIME}
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
@@ -28,6 +29,7 @@ services:
       - ${EXTENSION_PATH}:/opt/conda/share/jupyter/lab/extensions
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
+      - /dev:/dev
     environment:
      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
      # GIT_USER_NAME: $GIT_USER_NAME
@@ -41,7 +43,8 @@ services:
   jupyter:
     image: $IMAGE_NAME
     user: ${DOCKER_USER}
-    container_name: ${USER}-jupyter 
+    container_name: ${USER}-jupyter
+    runtime: ${RUNTIME} 
     working_dir: /home/${USER}
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app

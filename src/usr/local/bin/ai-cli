@@ -339,6 +339,14 @@ NOTEBOOK_VIRTUAL_HOST=${USER}-notebook.$URLNAME
 LAB_VIRTUAL_HOST=${USER}-lab.$URLNAME
 DOCKER_WORKSPACE="$(docker images -qf "reference=${USER}-workspace_workspace")"
 
+# default runtime
+# read from docker and extract value
+RUNTIME=$(docker info | grep -i "Default Runtime")
+RUNTIME=${RUNTIME#*: }
+
+# default build cuda
+BUILD_CUDA="" # do not vuild cuda
+
 # build image name from repo prefix and tag
 IMAGE_TAG="default"
 IMAGE_PREFIX=ai-cli/${USER}
@@ -361,7 +369,7 @@ EXTENSION_PATH="/home/${USER}/.local/share/ai-cli/extensions"
 
 # CLI Arguments ################################################################
 RUN_VOLUMES=()
-while getopts :he:g:n:c:v:i: flag
+while getopts :he:g:n:c:v:i:r: flag
 do
 	case "${flag}" in
 		v)  # Specify additional docker @VOLUME@s
@@ -380,6 +388,8 @@ do
 
 
 			RUN_VOLUMES+=($OPTARG);;
+		r) # Specify specific runtime
+			RUNTIME=${OPTARG};;
 		e)  # Specify environment @FILE
 			MLFLOW_ENV_FILE=${OPTARG} && source "$MLFLOW_ENV_FILE";;
 		g)  # Specify visible @GPUs (default $GPUS)
@@ -392,7 +402,7 @@ do
 
 			valid_c=false
 			for token in "$@"; do
-				if [[ $token = "upgrade" ]]; then
+				if [[ $token = "build" ]]; then
 					valid_c=true
 				fi
 			done
@@ -401,9 +411,11 @@ do
 				exit 1
 			fi
 			
-			CUDA_VERSION=${OPTARG};;
+			BUILD_CUDA="1";;
 		i) # Specify image to be used
 			IMAGE_NAME="${OPTARG}"
+			[[ "$IMAGE_NAME" == "cuda"  ]] && RUNTIME="nvidia" && BUILD_CUDA="1"
+			echo "INFO: RUNTIME $RUNTIME"
 		;;
 		*) show_help && exit 0;;
 	esac
@@ -435,6 +447,7 @@ export GIT_USER_NAME
 export GIT_USER_EMAIL
 export IMAGE_NAME
 export EXTENSION_PATH
+export RUNTIME
 # Run command ##################################################################
 if [[ $# == 0 ]]; then
 	show_help && exit 1
@@ -464,15 +477,15 @@ case ${CMD} in
 			CUDA_VERSION="${CUDA_MACHINE}.1"
 		fi
 		export CUDA_VERSION
-		dc server build --pull
-		dc workspace build --pull ;;
+		dc server build --pull ;;
+		#dc workspace build --pull ;;
 	build) # build image from dockerfile
 		CUDA_VERSION="11.2.1"
 		export CUDA_VERSION
 		echo "mlflow data ${MLFLOW_DATA}"
 		# fix docker wsl network problems:  docker run --dns 8.8.8.8 COMMAND (https://medium.com/@faithfulanere/solved-docker-build-could-not-resolve-archive-ubuntu-com-apt-get-fails-to-install-anything-9ea4dfdcdcf2)
 		# fix for build: https://stackoverflow.com/questions/44184496/configuring-options-for-docker-run/44184773#44184773
-		docker build -t ${IMAGE_NAME} --build-arg=ARG_NB_USER="$USER" --build-arg=ARG_NB_UID="$NB_UID" --build-arg=ARG_NB_GID="$NB_GID" --build-arg=ARG_HOME="/home/${USER}" /usr/local/share/ai-cli-docker/jupyter/
+		docker build -t ${IMAGE_NAME} --build-arg=ARG_NB_USER="$USER" --build-arg=ARG_NB_UID="$NB_UID" --build-arg=ARG_NB_GID="$NB_GID" --build-arg=ARG_HOME="/home/${USER}" --build-arg=ARG_INSTALL_CUDA=${BUILD_CUDA} /usr/local/share/ai-cli-docker/jupyter/
 		#docker-compose --file src/usr/local/share/ai-cli-docker/server.docker-compose.yaml up --build
 		echo "Build Finished"
 		;;
