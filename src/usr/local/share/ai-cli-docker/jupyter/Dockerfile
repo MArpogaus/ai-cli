@@ -45,7 +45,7 @@ RUN set -x && if [[ -z "$ARG_INSTALL_CUDA" ]] ; then echo "Not installing Cuda" 
     apt-key adv --batch --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub && \
     add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" && \
     apt-get update && \
-    apt-get -y install cuda-drivers-470 cuda-runtime-11-2 cuda-demo-suite-11-2 cuda-11-2 && \
+    apt-get -y install cuda-drivers-515 cuda-runtime-11-2 cuda-demo-suite-11-2 cuda-11-2 && \
     apt-get install -y libcudnn8 && \
     apt-get install -y libcudnn8-dev \
     ; fi
