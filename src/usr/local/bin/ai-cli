@@ -448,6 +448,7 @@ export GIT_USER_EMAIL
 export IMAGE_NAME
 export EXTENSION_PATH
 export RUNTIME
+export GPUS
 # Run command ##################################################################
 if [[ $# == 0 ]]; then
 	show_help && exit 1
