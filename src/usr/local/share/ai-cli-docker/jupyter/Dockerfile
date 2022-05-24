@@ -59,8 +59,12 @@ RUN apt-get -y install cuda-drivers
 #RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb && \
 #    dpkg -i cuda-keyring_1.0-1_all.deb && \
 RUN apt-get update && \
-    apt-get -y install cuda
+    apt-get -y install cuda-11-6
 
+
+RUN apt-get update && \
+    apt-get install libcudnn8=8.4.0.*-1+cuda11.6 && \
+    apt-get install libcudnn8-dev=8.4.0.*-1+cuda11.6
 
 RUN export PATH=/usr/local/cuda-11.7/bin${PATH:+:${PATH}} && \
     export LD_LIBRARY_PATH=/usr/local/cuda-11.7/lib64\
