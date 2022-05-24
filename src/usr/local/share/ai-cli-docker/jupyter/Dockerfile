@@ -39,16 +39,32 @@ RUN set -x && \
 
 RUN set -x && if [[ -z "$ARG_INSTALL_CUDA" ]] ; then echo "Not installing Cuda" ; else \
     echo "Argument is $ARG_INSTALL_CUDA, installing Cuda\n" && \
-    apt-get update && apt-get -y install gnupg software-properties-common && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
-    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    apt-key adv --batch --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub && \
-    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" && \
-    apt-get update && \
-    apt-get -y install cuda-drivers-515 cuda-runtime-11-2 cuda-demo-suite-11-2 cuda-11-2 && \
-    apt-get install -y libcudnn8 && \
-    apt-get install -y libcudnn8-dev \
+    apt-get update && apt-get -y install gnupg software-properties-common \
     ; fi
+
+RUN apt-key del 7fa2af80
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub
+
+RUN apt-get -y install linux-headers-$(uname -r) && \
+    distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g') && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/cuda-$distribution.pin && \
+    mv cuda-$distribution.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/7fa2af80.pub && \
+    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list && \
+    apt-get update
+
+RUN apt-get -y install cuda-drivers
+
+#RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb && \
+#    dpkg -i cuda-keyring_1.0-1_all.deb && \
+RUN apt-get update && \
+    apt-get -y install cuda
+
+
+RUN export PATH=/usr/local/cuda-11.7/bin${PATH:+:${PATH}} && \
+    export LD_LIBRARY_PATH=/usr/local/cuda-11.7/lib64\
+                         ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 RUN fix-permissions "${CONDA_DIR}"
 
