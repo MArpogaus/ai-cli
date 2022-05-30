@@ -54,10 +54,10 @@ RUN apt-get update && \
     apt-get -y install cuda-11-6 && \
     apt-get update && \
     apt-get install libcudnn8=8.4.0.*-1+cuda11.6 && \
-    apt-get install libcudnn8-dev=8.4.0.*-1+cuda11.6 && \
-    export PATH=/usr/local/cuda-11.7/bin${PATH:+:${PATH}} && \
-    export LD_LIBRARY_PATH=/usr/local/cuda-11.7/lib64\
-                         ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+    apt-get install libcudnn8-dev=8.4.0.*-1+cuda11.6
+
+ENV PATH=/usr/local/cuda-11.6/bin${PATH:+:${PATH}}
+ENV LD_LIBRARY_PATH=/usr/local/cuda-11.6/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 RUN fix-permissions "${CONDA_DIR}"
 

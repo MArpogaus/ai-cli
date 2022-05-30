@@ -353,7 +353,7 @@ IMAGE_PREFIX=ai-cli/${USER}
 IMAGE_NAME=${IMAGE_PREFIX}:${IMAGE_TAG}
 
 # CLI args defaults
-GPUS=0,1
+GPUS=""
 
 # CHECK INIT ###################################################################
 # Looks at known dependencies and errors if it finds at least one of them unmet.
@@ -393,7 +393,9 @@ do
 		e)  # Specify environment @FILE
 			MLFLOW_ENV_FILE=${OPTARG} && source "$MLFLOW_ENV_FILE";;
 		g)  # Specify visible @GPUs (default $GPUS)
-			OPT_GPUS=${OPTARG};;
+			GPUS=${OPTARG}
+			#GPUS="0,1"
+			RUNTIME="nvidia";;
 		n)  # Specify experiment @NAME
 			MLFLOW_EXPERIMENT_NAME=${OPTARG};;
 		c) # Specify @CUDA version (default $CUDA_VERSION)
@@ -410,18 +412,17 @@ do
 				echo "ERROR: -c used in wrong context. Only valid when you call 'upgrade'."
 				exit 1
 			fi
+			;;	
 			
-			BUILD_CUDA="1";;
 		i) # Specify image to be used
 			IMAGE_NAME="${OPTARG}"
-			[[ "$IMAGE_NAME" == "cuda"  ]] && RUNTIME="nvidia" && BUILD_CUDA="1"
+			#[[ "$IMAGE_NAME" == "cuda"  ]] && RUNTIME="nvidia" && BUILD_CUDA="1"
 			echo "INFO: RUNTIME $RUNTIME"
 		;;
 		*) show_help && exit 0;;
 	esac
 done
 shift $((OPTIND-1))
-GPUS=${OPT_GPUS:-$GPUS}
 
 # CLI args for docker-compose run
 RUN_ARGS="--rm"
@@ -434,11 +435,16 @@ if [[ -n $MLFLOW_EXPERIMENT_NAME  ]]; then
 	RUN_ARGS+=" -e MLFLOW_EXPERIMENT_NAME=$MLFLOW_EXPERIMENT_NAME"
 fi
 
+
+
+echo "INFO: Using image ${IMAGE_NAME}"
+# Exports #####################################################################
 # Export env for docker-compose
 if [[ -e $MLFLOW_ENV_FILE ]]; then
 	export MLFLOW_ENV_FILE
 fi
 
+export CUDA_VERSION
 export MLFLOW_DATA=/mnt/data/$USER/mlflow
 export DOCKER_USER
 export NB_UID
@@ -449,6 +455,9 @@ export IMAGE_NAME
 export EXTENSION_PATH
 export RUNTIME
 export GPUS
+# show docker info ####################################################################
+echo "INFO: using runtime $RUNTIME"
+echo "INFO: using gpus '$GPUS'"
 # Run command ##################################################################
 if [[ $# == 0 ]]; then
 	show_help && exit 1
@@ -456,9 +465,6 @@ else
 	CMD=$1
 	shift
 fi
-echo "INFO: Using image ${IMAGE_NAME}"
-CUDA_VERSION="11.2.1"
-export CUDA_VERSION
 case ${CMD} in
 	init) # initialize ai-cli for your user
 		init;;

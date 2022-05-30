@@ -27,7 +27,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids: [ "${GPUS}" ] 
               capabilities: [gpu]
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
