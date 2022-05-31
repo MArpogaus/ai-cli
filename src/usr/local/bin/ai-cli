@@ -207,6 +207,15 @@ remove_whitespace(){
 	leadingspace_txt=$(echo "$emptylines_txt" | sed 's/^[[:space:]]*//' ) # remove leading whitespace
 	echo "$leadingspace_txt"
 }
+show_docker_associated_images()
+{
+	echo "Docker Associated Images"
+	docker image list "${IMAGE_PREFIX}" | \
+	while read -r line
+	do
+		  printf '   %s\n' "$line"
+	done
+}
 show_docker_workspace_status()
 {
 	echo "Docker Workspace Image"
@@ -301,7 +310,8 @@ show_mlflow_status(){
 }
 show_status(){
 	
-	show_docker_workspace_status
+	#show_docker_workspace_status
+	show_docker_associated_images
 	echo ""
 	show_mlflow_status
 	echo ""
@@ -392,7 +402,7 @@ do
 			RUNTIME=${OPTARG};;
 		e)  # Specify environment @FILE
 			MLFLOW_ENV_FILE=${OPTARG} && source "$MLFLOW_ENV_FILE";;
-		g)  # Specify visible @GPUs (default $GPUS)
+		g)  # Enable gpu support. E.g. 0 for nvidia gpu 0, or 0,1 for gpu 0 and 1
 			GPUS=${OPTARG}
 			#GPUS="0,1"
 			RUNTIME="nvidia";;
@@ -409,9 +419,10 @@ do
 				fi
 			done
 			if [[ $valid_c = false ]]; then
-				echo "ERROR: -c used in wrong context. Only valid when you call 'upgrade'."
+				echo "ERROR: -c used in wrong context. Only valid when you call 'build'."
 				exit 1
 			fi
+			CUDA_VERSION=${OPTARG}	
 			;;	
 			
 		i) # Specify image to be used
@@ -437,7 +448,6 @@ fi
 
 
 
-echo "INFO: Using image ${IMAGE_NAME}"
 # Exports #####################################################################
 # Export env for docker-compose
 if [[ -e $MLFLOW_ENV_FILE ]]; then
@@ -456,6 +466,7 @@ export EXTENSION_PATH
 export RUNTIME
 export GPUS
 # show docker info ####################################################################
+echo "INFO: Using image ${IMAGE_NAME}"
 echo "INFO: using runtime $RUNTIME"
 echo "INFO: using gpus '$GPUS'"
 # Run command ##################################################################
@@ -478,24 +489,33 @@ case ${CMD} in
 		dc server up -d ;;
 	status) # show status of jupyter server
 		show_status ;;
-	upgrade) # pull and rebuild the docker containers
-		if [[ -z $CUDA_VERSION ]]; then
-			CUDA_MACHINE="$(nvidia-smi | grep CUDA | sed -r 's/.*CUDA Version:.*([0-9][0-9]\.[0-9][0-9]*).*/\1/')"
-			CUDA_VERSION="${CUDA_MACHINE}.1"
-		fi
-		export CUDA_VERSION
-		dc server build --pull ;;
-		#dc workspace build --pull ;;
 	build) # build image from dockerfile
+		
+		# workspace-cuda depends on workspace-base image existing so is always built
+		echo "INFO: Building workspace-base"
 		docker build \
 			-t ${IMAGE_NAME} \
+			-t ai-cli/workspace-base \
 			--build-arg=ARG_NB_USER="$USER" \
 			--build-arg=ARG_NB_UID="$NB_UID" \
 			--build-arg=ARG_NB_GID="$NB_GID" \
 			--build-arg=ARG_HOME="/home/${USER}" \
-			--build-arg=ARG_INSTALL_CUDA=${BUILD_CUDA}\
-		       	/usr/local/share/ai-cli-docker/jupyter/
-		echo "Build Finished"
+		       	/usr/local/share/ai-cli-docker/workspace-base/
+		
+		if [ -z ${CUDA_VERSION} ]; 
+		then 
+		      : # null command	
+		else 
+		echo "INFO: Building workspace-cuda"; 
+		docker build \
+			-t ${IMAGE_NAME} \
+			-t ai-cli/workspace-cuda \
+			--build-arg=ARG_NB_USER="$USER" \
+			--build-arg=ARG_NB_UID="$NB_UID" \
+			--build-arg=ARG_NB_GID="$NB_GID" \
+			--build-arg=ARG_HOME="/home/${USER}" \
+		       	/usr/local/share/ai-cli-docker/workspace-cuda/
+		fi
 		;;
 	bash) # start bash shell inside ai-cli container
 		export MLFLOW_LOCAL_PROJECT

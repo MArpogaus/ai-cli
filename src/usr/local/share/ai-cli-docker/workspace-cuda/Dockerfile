@@ -13,28 +13,10 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-FROM jupyter/minimal-notebook:ubuntu-20.04
+FROM ai-cli/workspace-base
 
 # switch to root to fix permissions for local user
 USER root
-
-ARG ARG_NB_USER \
-    ARG_NB_UID \
-    ARG_NB_GID \
-    ARG_HOME \
-    ARG_INSTALL_CUDA
-
-ENV NB_USER=${ARG_NB_USER} \
-    NB_UID=${ARG_NB_UID} \
-    NB_GID=${ARG_NB_GID} \
-    HOME=${ARG_HOME} \
-    MLFLOW_CONDA_CREATE_ENV_CMD=mamba
-
-RUN set -x && \
-    mamba install --quiet --yes \
-    'mlflow' \
-    'nb_conda_kernels' && \
-    mamba clean --all -f -y 
 
 # INSTALL CUDA
 RUN apt-get update && \ 
