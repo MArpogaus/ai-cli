@@ -51,7 +51,14 @@ services:
     image: $IMAGE_NAME
     user: ${DOCKER_USER}
     container_name: ${USER}-jupyter
-    runtime: ${RUNTIME} 
+    runtime: ${RUNTIME}
+    deploy:
+      resources:
+        reservations:
+          devices: 
+            - driver: nvidia
+              device_ids: [ "${GPUS}" ]
+              capabilities: [gpu]
     working_dir: /home/${USER}
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
