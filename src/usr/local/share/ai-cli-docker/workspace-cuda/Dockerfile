@@ -18,6 +18,9 @@ FROM ai-cli/workspace-base
 # switch to root to fix permissions for local user
 USER root
 
+ARG CMAJ \
+    CMIN
+    
 # INSTALL CUDA
 RUN apt-get update && \ 
     apt-get -y install gnupg software-properties-common && \
@@ -33,13 +36,13 @@ RUN apt-get update && \
     apt-get update && \
     apt-get -y install cuda-drivers && \
     apt-get update && \
-    apt-get -y install cuda-11-6 && \
+    apt-get -y install cuda-${CMAJ}-${CMIN} && \
     apt-get update && \
-    apt-get install libcudnn8=8.4.0.*-1+cuda11.6 && \
-    apt-get install libcudnn8-dev=8.4.0.*-1+cuda11.6
+    apt-get install libcudnn8=8*-1+cuda${CMAJ}.${CMIN} && \
+    apt-get install libcudnn8-dev=8*-1+cuda${CMAJ}.${CMIN}
 
-ENV PATH=/usr/local/cuda-11.6/bin${PATH:+:${PATH}}
-ENV LD_LIBRARY_PATH=/usr/local/cuda-11.6/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+ENV PATH=/usr/local/cuda-${CMAJ}.${CMIN}/bin${PATH:+:${PATH}}
+ENV LD_LIBRARY_PATH=/usr/local/cuda-${CMAJ}.${CMIN}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 RUN fix-permissions "${CONDA_DIR}"
 

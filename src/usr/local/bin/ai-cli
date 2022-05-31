@@ -408,7 +408,7 @@ do
 			RUNTIME="nvidia";;
 		n)  # Specify experiment @NAME
 			MLFLOW_EXPERIMENT_NAME=${OPTARG};;
-		c) # Specify @CUDA version (default $CUDA_VERSION)
+		c) # Specify @CUDA version to use. Needs to be compatible to host system. 11.5, 11.6 is tested with driver 515.32.04 
 			# check if we upgrade
 			# -c is only valid when upgrading
 
@@ -492,6 +492,7 @@ case ${CMD} in
 	build) # build image from dockerfile
 		
 		# workspace-cuda depends on workspace-base image existing so is always built
+		echo "INFO: Specified Cuda Version: '${CUDA_VERSION}'"
 		echo "INFO: Building workspace-base"
 		docker build \
 			-t ${IMAGE_NAME} \
@@ -505,8 +506,12 @@ case ${CMD} in
 		if [ -z ${CUDA_VERSION} ]; 
 		then 
 		      : # null command	
-		else 
+		else
 		echo "INFO: Building workspace-cuda"; 
+		# version formats vary so we need to split into major and minor version
+		CMAJ=${CUDA_VERSION%\.*}
+		CMIN=${CUDA_VERSION#*\.}
+		echo "INFO: CMAJ ${CMAJ}, CMIN ${CMIN}"	
 		docker build \
 			-t ${IMAGE_NAME} \
 			-t ai-cli/workspace-cuda \
@@ -514,7 +519,9 @@ case ${CMD} in
 			--build-arg=ARG_NB_UID="$NB_UID" \
 			--build-arg=ARG_NB_GID="$NB_GID" \
 			--build-arg=ARG_HOME="/home/${USER}" \
-		       	/usr/local/share/ai-cli-docker/workspace-cuda/
+		       	--build-arg=CMAJ="$CMAJ" \
+			--build-arg=CMIN="$CMIN" \
+			/usr/local/share/ai-cli-docker/workspace-cuda/
 		fi
 		;;
 	bash) # start bash shell inside ai-cli container
