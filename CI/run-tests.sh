@@ -11,6 +11,10 @@ echo "exec init"
 bash -x ai-cli init
 echo "exec init finished successfully"
 
+echo "start mlflow"
+bash ai-cli start-server
+echo "start mlflow finished successfully"
+
 #echo "exec run"
 #( cd tests/run_basic && bash -x ./exec_test.sh )
 #echo "exec run finished successfully"
