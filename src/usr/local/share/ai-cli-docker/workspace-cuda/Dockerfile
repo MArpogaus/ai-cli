@@ -34,17 +34,14 @@ RUN apt-get update && \
     apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/7fa2af80.pub && \
     echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list && \
     apt-get update && \
-    apt-get -y install cuda-drivers && \
-    apt-get update && \
-    apt-get -y install cuda-${CMAJ}-${CMIN} && \
-    apt-get update && \
-    apt-get install libcudnn8=8*-1+cuda${CMAJ}.${CMIN} && \
-    apt-get install libcudnn8-dev=8*-1+cuda${CMAJ}.${CMIN}
+    apt-get -y install cuda-drivers cuda-${CMAJ}-${CMIN} libcudnn8=8*-1+cuda${CMAJ}.${CMIN} libcudnn8-dev=8*-1+cuda${CMAJ}.${CMIN}
 
 ENV PATH=/usr/local/cuda-${CMAJ}.${CMIN}/bin${PATH:+:${PATH}}
 ENV LD_LIBRARY_PATH=/usr/local/cuda-${CMAJ}.${CMIN}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 RUN fix-permissions "${CONDA_DIR}"
+
+RUN apt-get clean
 
 # Switch user to avoid accidental container runs as root
 USER $NB_USER

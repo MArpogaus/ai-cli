@@ -355,13 +355,9 @@ DOCKER_WORKSPACE="$(docker images -qf "reference=${USER}-workspace_workspace")"
 RUNTIME=$(docker info | grep -i "Default Runtime")
 RUNTIME=${RUNTIME#*: }
 
-# default build cuda
-BUILD_CUDA="" # do not vuild cuda
-
-# build image name from repo prefix and tag
+# define image repo prefix and tag
 IMAGE_TAG="default"
 IMAGE_PREFIX=ai-cli/${USER}
-IMAGE_NAME=${IMAGE_PREFIX}:${IMAGE_TAG}
 
 # CLI args defaults
 GPUS=""
@@ -380,7 +376,7 @@ EXTENSION_PATH="/home/${USER}/.local/share/ai-cli/extensions"
 
 # CLI Arguments ################################################################
 RUN_VOLUMES=()
-while getopts :he:g:n:c:v:i:r: flag
+while getopts :he:g:n:c:v:i:t:r: flag
 do
 	case "${flag}" in
 		v)  # Specify additional docker @VOLUME@s
@@ -409,7 +405,7 @@ do
 			RUNTIME="nvidia";;
 		n)  # Specify experiment @NAME
 			MLFLOW_EXPERIMENT_NAME=${OPTARG};;
-		c) # Specify @CUDA version to use. Needs to be compatible to host system. 11.5, 11.6 is tested with driver 515.32.04 
+		c) # build with cuda support. Specify @CUDA version to use. Needs to be compatible to host system. 11.5, 11.6 is tested with driver 515.32.04 
 			# check if we upgrade
 			# -c is only valid when upgrading
 
@@ -423,13 +419,17 @@ do
 				echo "ERROR: -c used in wrong context. Only valid when you call 'build'."
 				exit 1
 			fi
-			CUDA_VERSION=${OPTARG}	
+			CUDA_VERSION=${OPTARG}
+			IMAGE_TAG=c"$CUDA_VERSION"
 			;;	
 			
-		i) # Specify image to be used
+		i) # Specify image to be used (already includes tag)
 			IMAGE_NAME="${OPTARG}"
 			#[[ "$IMAGE_NAME" == "cuda"  ]] && RUNTIME="nvidia" && BUILD_CUDA="1"
-			echo "INFO: RUNTIME $RUNTIME"
+		;;
+
+		t) # specify image tag to be used (uses ai-cli/username image base)
+			IMAGE_TAG="${OPTARG}"
 		;;
 		*) show_help && exit 0;;
 	esac
@@ -447,7 +447,10 @@ if [[ -n $MLFLOW_EXPERIMENT_NAME  ]]; then
 	RUN_ARGS+=" -e MLFLOW_EXPERIMENT_NAME=$MLFLOW_EXPERIMENT_NAME"
 fi
 
-
+# BUILD IMAGE NAME TO USE
+if [[ -z "$IMAGE_NAME" ]]; then
+	IMAGE_NAME=${IMAGE_PREFIX}:${IMAGE_TAG};
+fi
 
 # Exports #####################################################################
 # Export env for docker-compose
@@ -515,7 +518,7 @@ case ${CMD} in
 		echo "INFO: CMAJ ${CMAJ}, CMIN ${CMIN}"	
 		docker build \
 			-t ${IMAGE_NAME} \
-			-t ai-cli/workspace-cuda \
+			-t ai-cli/workspace-cuda:"$IMAGE_TAG" \
 			--build-arg=ARG_NB_USER="$USER" \
 			--build-arg=ARG_NB_UID="$NB_UID" \
 			--build-arg=ARG_NB_GID="$NB_GID" \
