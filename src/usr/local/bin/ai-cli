@@ -421,6 +421,10 @@ do
 			fi
 			CUDA_VERSION=${OPTARG}
 			IMAGE_TAG=c"$CUDA_VERSION"
+
+			# also read driver version
+			DRIVER_VERSION=$(modinfo nvidia | grep ^version: | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+			DRIVER_PREFIX=$(modinfo nvidia | grep ^version: | grep -oE "[0-9]+" | head -1 )
 			;;	
 			
 		i) # Specify image to be used (already includes tag)
@@ -459,6 +463,8 @@ if [[ -e $MLFLOW_ENV_FILE ]]; then
 fi
 
 export CUDA_VERSION
+export DRIVER_VERSION
+export DRIVER_PREFIX
 export MLFLOW_DATA=/mnt/data/$USER/mlflow
 export DOCKER_USER
 export NB_UID
@@ -515,7 +521,8 @@ case ${CMD} in
 		# version formats vary so we need to split into major and minor version
 		CMAJ=${CUDA_VERSION%\.*}
 		CMIN=${CUDA_VERSION#*\.}
-		echo "INFO: CMAJ ${CMAJ}, CMIN ${CMIN}"	
+		echo "INFO: CMAJ ${CMAJ}, CMIN ${CMIN}"
+		echo "INFO: NVIDIA DRIVER ${DRIVER_VERSION}"
 		docker build \
 			-t ${IMAGE_NAME} \
 			-t ai-cli/workspace-cuda:"$IMAGE_TAG" \
@@ -523,7 +530,9 @@ case ${CMD} in
 			--build-arg=ARG_NB_UID="$NB_UID" \
 			--build-arg=ARG_NB_GID="$NB_GID" \
 			--build-arg=ARG_HOME="/home/${USER}" \
-		       	--build-arg=CMAJ="$CMAJ" \
+			--build-arg=ARG_DRIVER_VERSION="${DRIVER_VERSION}" \
+		       	--build-arg=ARG_DRIVER_PREFIX="${DRIVER_PREFIX}" \
+			--build-arg=CMAJ="$CMAJ" \
 			--build-arg=CMIN="$CMIN" \
 			/usr/local/share/ai-cli-docker/workspace-cuda/
 		fi
