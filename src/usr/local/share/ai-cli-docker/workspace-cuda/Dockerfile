@@ -1,3 +1,4 @@
+ARG TARGETARCH
 FROM ai-cli/workspace-base as base
 USER root
 
@@ -59,9 +60,7 @@ ENV NV_CUDNN_PACKAGE "libcudnn8=$NV_CUDNN_VERSION-1+cuda11.5"
 
 # -------------- CUDA BASE ----------------
 
-ARG TARGETARCH
-RUN echo ${TARGETARCH}
-FROM base-amd64
+FROM base-${TARGETARCH}
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 curl ca-certificates && \
