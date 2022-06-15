@@ -534,6 +534,7 @@ case ${CMD} in
 		       	--build-arg=ARG_DRIVER_PREFIX="${DRIVER_PREFIX}" \
 			--build-arg=CMAJ="$CMAJ" \
 			--build-arg=CMIN="$CMIN" \
+			--build-arg=TARGETARCH="amd64" \
 			/usr/local/share/ai-cli-docker/workspace-cuda/
 		fi
 		;;

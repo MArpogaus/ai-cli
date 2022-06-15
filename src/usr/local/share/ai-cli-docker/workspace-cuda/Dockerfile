@@ -1,68 +1,117 @@
-#    AI-CLI Simplifying AI Experiments
-#    Copyright (C) 2022  Marcel Arpogaus, Julian Jandeleit
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-FROM ai-cli/workspace-base
-
-# switch to root to fix permissions for local user
+FROM ai-cli/workspace-base as base
 USER root
 
-ARG CMAJ \
-    CMIN \
-    ARG_DRIVER_VERSION \
-    ARG_DRIVER_PREFIX
-    
-# INSTALL CUDA
-RUN apt-get update && \ 
-    apt-get -y --no-install-recommends install gnupg software-properties-common && \
-    apt-key del 7fa2af80 && \
-    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub && \
-    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub && \
-    apt-get -y --no-install-recommends install linux-headers-$(uname -r) && \
-    distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g') && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/cuda-$distribution.pin && \
-    mv cuda-$distribution.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/7fa2af80.pub && \
-    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list && \
-    apt-get update
+# --------------- ARCH SPECIFIC ENVS --------------
 
-# FIX cuda-drivers metapackage version
-RUN set -x && V=515.43.04-1 && \
-    cd /tmp && \
-    apt-get -y download cuda-drivers || apt-get -y download cuda-drivers && \
-    dpkg-deb -x cuda-drivers* pkg-dir && \
-    dpkg-deb --control cuda-drivers* pkg-dir/DEBIAN && \
-    sed -ri "s/([0-9]+\.[0-9]+\.[0-9]+\-[0-9]+)/$V/g" pkg-dir/DEBIAN/control && \
-    cat pkg-dir/DEBIAN/control && \
-    dpkg -b pkg-dir fixed-cuda-drivers.deb && \
-    #dpkg -i ./fixed-cuda-drivers.deb && \
-    #apt-get -y --no-install-recommends install ./fixed-cuda-drivers.deb && \
-    P=515 && \
-    V=515.43.04* && \
-    apt-get -y --allow-downgrades install nvidia-driver-$P=$V libnvidia-gl-$P=$V libnvidia-common-$P=$V nvidia-dkms-$P=$V nvidia-kernel-common-$P=$V nvidia-kernel-source-$P=$V libnvidia-compute-$P=$V libnvidia-extra-$P=$V nvidia-compute-utils-$P=$V libnvidia-decode-$P=$V libnvidia-encode-$P=$V nvidia-utils-$P=$V xserver-xorg-video-nvidia-$P=$V libnvidia-cfg1-$P=$V libnvidia-fbc1-$P=$V ./fixed-cuda-drivers.deb cuda-drivers-$P=$V cuda-$CMAJ-$CMIN libcudnn8=8*-1+cuda${CMAJ}.${CMIN}
+FROM base as base-amd64
 
-#RUN apt-get - y -allow-downgrades install cuda-drivers-515:515.43*
+ENV NVARCH x86_64
 
-#RUN apt-get -y install cuda-$CMAJ-$CMIN
+ENV NVIDIA_REQUIRE_CUDA "cuda>=11.5 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=450,driver<451 brand=tesla,driver>=470,driver<471 brand=unknown,driver>=470,driver<471 brand=nvidia,driver>=470,driver<471 brand=nvidiartx,driver>=470,driver<471 brand=quadrortx,driver>=470,driver<471"
+ENV NV_CUDA_CUDART_VERSION 11.5.50-1
+ENV NV_CUDA_COMPAT_PACKAGE cuda-compat-11-5
 
-ENV PATH=/usr/local/cuda-${CMAJ}.${CMIN}/bin${PATH:+:${PATH}}
-ENV LD_LIBRARY_PATH=/usr/local/cuda-${CMAJ}.${CMIN}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+ENV NV_NVTX_VERSION 11.5.50-1
+ENV NV_LIBNPP_VERSION 11.5.1.53-1
+ENV NV_LIBNPP_PACKAGE libnpp-11-5=${NV_LIBNPP_VERSION}
+ENV NV_LIBCUSPARSE_VERSION 11.7.0.31-1
 
-#RUN fix-permissions "${CONDA_DIR}"
+ENV NV_LIBCUBLAS_PACKAGE_NAME libcublas-11-5
+ENV NV_LIBCUBLAS_VERSION 11.7.3.1-1
+ENV NV_LIBCUBLAS_PACKAGE ${NV_LIBCUBLAS_PACKAGE_NAME}=${NV_LIBCUBLAS_VERSION}
 
-#RUN apt-get clean
+ENV NV_LIBNCCL_PACKAGE_NAME libnccl2
+ENV NV_LIBNCCL_PACKAGE_VERSION 2.11.4-1
+ENV NCCL_VERSION 2.11.4-1
+ENV NV_LIBNCCL_PACKAGE ${NV_LIBNCCL_PACKAGE_NAME}=${NV_LIBNCCL_PACKAGE_VERSION}+cuda11.5
 
-# Switch user to avoid accidental container runs as root
+ENV NV_CUDNN_VERSION 8.3.3.40
+ENV NV_CUDNN_PACKAGE_NAME "libcudnn8"
+
+ENV NV_CUDNN_PACKAGE "libcudnn8=$NV_CUDNN_VERSION-1+cuda11.5"
+
+FROM base as base-arm64
+
+ENV NVARCH sbsa
+ENV NVIDIA_REQUIRE_CUDA "cuda>=11.5"
+ENV NV_CUDA_CUDART_VERSION 11.5.50-1
+
+
+ENV NV_NVTX_VERSION 11.5.50-1
+ENV NV_LIBNPP_VERSION 11.5.1.53-1
+ENV NV_LIBNPP_PACKAGE libnpp-11-5=${NV_LIBNPP_VERSION}
+ENV NV_LIBCUSPARSE_VERSION 11.7.0.31-1
+
+ENV NV_LIBCUBLAS_PACKAGE_NAME libcublas-11-5
+ENV NV_LIBCUBLAS_VERSION 11.7.3.1-1
+ENV NV_LIBCUBLAS_PACKAGE ${NV_LIBCUBLAS_PACKAGE_NAME}=${NV_LIBCUBLAS_VERSION}
+
+ENV NV_LIBNCCL_PACKAGE_NAME libnccl2
+ENV NV_LIBNCCL_PACKAGE_VERSION 2.11.4-1
+ENV NCCL_VERSION 2.11.4-1
+ENV NV_LIBNCCL_PACKAGE ${NV_LIBNCCL_PACKAGE_NAME}=${NV_LIBNCCL_PACKAGE_VERSION}+cuda11.5
+
+
+ENV NV_CUDNN_VERSION 8.3.3.40
+ENV NV_CUDNN_PACKAGE_NAME "libcudnn8"
+
+ENV NV_CUDNN_PACKAGE "libcudnn8=$NV_CUDNN_VERSION-1+cuda11.5"
+
+# -------------- CUDA BASE ----------------
+
+ARG TARGETARCH
+RUN echo ${TARGETARCH}
+FROM base-amd64
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gnupg2 curl ca-certificates && \
+    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${NVARCH}/3bf863cc.pub | apt-key add - && \
+    echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${NVARCH} /" > /etc/apt/sources.list.d/cuda.list && \
+    apt-get purge --autoremove -y curl \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV CUDA_VERSION 11.5.0
+
+# For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cuda-cudart-11-5=${NV_CUDA_CUDART_VERSION} \
+    ${NV_CUDA_COMPAT_PACKAGE} \
+    && ln -s cuda-11.5 /usr/local/cuda && \
+    rm -rf /var/lib/apt/lists/*
+
+# Required for nvidia-docker v1
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+    && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+
+ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+
+# ------------- CUDA RUNTIME -------------
+
+ENV NV_CUDA_LIB_VERSION 11.5.0-1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cuda-libraries-11-5=${NV_CUDA_LIB_VERSION} \
+    ${NV_LIBNPP_PACKAGE} \
+    cuda-nvtx-11-5=${NV_NVTX_VERSION} \
+    libcusparse-11-5=${NV_LIBCUSPARSE_VERSION} \
+    ${NV_LIBCUBLAS_PACKAGE} \
+    ${NV_LIBNCCL_PACKAGE} \
+    && rm -rf /var/lib/apt/lists/*
+
+# Keep apt from auto upgrading the cublas and nccl packages. See https://gitlab.com/nvidia/container-images/cuda/-/issues/88
+RUN apt-mark hold ${NV_LIBCUBLAS_PACKAGE_NAME} ${NV_LIBNCCL_PACKAGE_NAME}
+
+# ------------- CUDA CUDNN --------------
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ${NV_CUDNN_PACKAGE} \
+    && apt-mark hold ${NV_CUDNN_PACKAGE_NAME} \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---------- ai-cli jupyter settings ---------
+
 USER $NB_USER
-
