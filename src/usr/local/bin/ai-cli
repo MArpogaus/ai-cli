@@ -174,11 +174,6 @@ disambiguate_host(){
 		return 0
 	fi
 
-	#echo "instances"
-	#echo "$instances"
-	#echo "numbers"
-	#echo "$numbers"
-	
 	n_max=10
 	changed=0
 	for i in $(seq 2 $n_max)
@@ -201,13 +196,8 @@ disambiguate_host(){
 
 	echo "$hname"
 }
-# TODO: maybe not necessary anymore
-remove_whitespace(){
-	txt="$1"
-	emptylines_txt=$( echo "$txt" | sed '/^[[:space:]]*$/d' ) # remove empty lines
-	leadingspace_txt=$(echo "$emptylines_txt" | sed 's/^[[:space:]]*//' ) # remove leading whitespace
-	echo "$leadingspace_txt"
-}
+
+# ---- show related functions
 show_docker_associated_images()
 {
 	echo "Docker Associated Images"
@@ -216,28 +206,6 @@ show_docker_associated_images()
 	do
 		  printf '   %s\n' "$line"
 	done
-}
-show_docker_workspace_status()
-{
-	echo "Docker Workspace Image"
-	if [ -n "$DOCKER_WORKSPACE" ]; then
-		dockerws_cuda="$( docker image inspect -f '	
-		{{range .Config.Env }}
-			{{with $line := (split . "=")}}
-				{{if eq (index . 0) "CUDA_VERSION"}}
-					{{ index . 1 }}
-				{{end}}
-			{{end}}
-		{{end}}
-		' $DOCKER_WORKSPACE
-		)"
-
-		printf "   CUDA %s
-" $dockerws_cuda
-
-	else
-		echo "No Workspace Image available"
-	fi
 }
 show_jupyter_status(){
 	if [ -n "$JUPYTER_CONTAINER" ]; then
@@ -311,14 +279,15 @@ show_mlflow_status(){
 }
 show_status(){
 	
-	#show_docker_workspace_status
 	show_docker_associated_images
 	echo ""
 	show_mlflow_status
 	echo ""
 	show_jupyter_status
 }
-# Define Paths #################################################################
+
+
+# Define Paths on HOST #################################################################
 DOCKER_COMPOSE_PATH=/usr/local/share/ai-cli-docker/
 HTPASSWD_PATH=/usr/share/ai-cli/htpasswd
 
@@ -401,11 +370,10 @@ do
 			MLFLOW_ENV_FILE=${OPTARG} && source "$MLFLOW_ENV_FILE";;
 		g)  # Enable gpu support. E.g. 0 for nvidia gpu 0, or 0,1 for gpu 0 and 1
 			GPUS=${OPTARG}
-			#GPUS="0,1"
 			RUNTIME="nvidia";;
 		n)  # Specify experiment @NAME
 			MLFLOW_EXPERIMENT_NAME=${OPTARG};;
-		c) # build with cuda support. Specify @CUDA version to use. Needs to be compatible to host system. 11.5, 11.6 is tested with driver 515.32.04 
+		c) # build with cuda support. Specify @CUDA version to use. Needs to be compatible to host system. 11.1 - 11.6 is tested with driver 515.32.04 
 			# check if we upgrade
 			# -c is only valid when upgrading
 
@@ -422,9 +390,6 @@ do
 			CUDA_VERSION=${OPTARG}
 			IMAGE_TAG=c"$CUDA_VERSION"
 
-			# also read driver version
-			DRIVER_VERSION=$(modinfo nvidia | grep ^version: | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
-			DRIVER_PREFIX=$(modinfo nvidia | grep ^version: | grep -oE "[0-9]+" | head -1 )
 			;;	
 			
 		i) # Specify image to be used (already includes tag)
@@ -432,18 +397,15 @@ do
 			#[[ "$IMAGE_NAME" == "cuda"  ]] && RUNTIME="nvidia" && BUILD_CUDA="1"
 		;;
 
-		t) # specify image tag to be used (uses ai-cli/username image base)
+		t) # Specify image tag to be used (uses ai-cli BACKSLASH username image base)
 			IMAGE_TAG="${OPTARG}"
 		;;
 		*) show_help && exit 0;;
 	esac
 done
-shift $((OPTIND-1))
-
+shift $((OPTIND-1)) # to skip options arguments when evaulating command
 # CLI args for docker-compose run
 RUN_ARGS="--rm"
-#RUN_ARGS+=" --user $DOCKER_USER"
-RUN_ARGS+=" -e CUDA_VISIBLE_DEVICES=$GPUS"
 for v in ${RUN_VOLUMES[@]}; do
 	RUN_ARGS+=" -v $v"
 done
@@ -463,8 +425,6 @@ if [[ -e $MLFLOW_ENV_FILE ]]; then
 fi
 
 export CUDA_VERSION
-export DRIVER_VERSION
-export DRIVER_PREFIX
 export MLFLOW_DATA=/mnt/data/$USER/mlflow
 export DOCKER_USER
 export NB_UID
@@ -513,10 +473,7 @@ case ${CMD} in
 			--build-arg=ARG_HOME="/home/${USER}" \
 		       	/usr/local/share/ai-cli-docker/workspace-base/
 		
-		if [ -z ${CUDA_VERSION} ]; 
-		then 
-		      : # null command	
-		else
+		if [ ${CUDA_VERSION} ]; then 
 		echo "INFO: Building workspace-cuda"; 
 		# version formats vary so we need to split into major and minor version
 		CMAJ=${CUDA_VERSION%\.*}
@@ -530,8 +487,6 @@ case ${CMD} in
 			--build-arg=ARG_NB_UID="$NB_UID" \
 			--build-arg=ARG_NB_GID="$NB_GID" \
 			--build-arg=ARG_HOME="/home/${USER}" \
-			--build-arg=ARG_DRIVER_VERSION="${DRIVER_VERSION}" \
-		       	--build-arg=ARG_DRIVER_PREFIX="${DRIVER_PREFIX}" \
 			--build-arg=CMAJ="$CMAJ" \
 			--build-arg=CMIN="$CMIN" \
 			--build-arg=TARGETARCH="amd64" \
@@ -554,7 +509,6 @@ case ${CMD} in
 		export MLFLOW_LOCAL_PROJECT
 		echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
 		echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-		#docker_run jupyter $JUPYTER_LAB_CMD ;;
 		docker_run jupyter $JUPYTER_LAB_CMD;;
 	exec) # execute @PROGRAMM inside ai-cli container
 		if [[ $# == 0 ]]; then
