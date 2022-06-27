@@ -393,8 +393,17 @@ do
 			;;	
 			
 		i) # Specify image to be used (already includes tag)
+			valid_i=true
+			for token in "$@"; do
+				if [[ $token = "build" ]]; then
+					valid_i=false
+				fi
+			done
+			if [[ $valid_i = false ]]; then
+				echo "ERROR: -i used in wrong context. Not valid when you call 'build' use -t or -c instead."
+				exit 1
+			fi
 			IMAGE_NAME="${OPTARG}"
-			#[[ "$IMAGE_NAME" == "cuda"  ]] && RUNTIME="nvidia" && BUILD_CUDA="1"
 		;;
 
 		t) # Specify image tag to be used (uses ai-cli BACKSLASH username image base)
