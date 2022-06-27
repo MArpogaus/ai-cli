@@ -29,15 +29,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     
 # install cuda from repo
 RUN apt-get update && apt-get install -y --no-install-recommends \
-       cuda-cudart-${CMAJ}-${CMIN}=${NV_CUDA_CUDART_VERSION} \
-       ${NV_CUDA_COMPAT_PACKAGE} \
+       #cuda-cudart-${CMAJ}-${CMIN}=${NV_CUDA_CUDART_VERSION} \
+       #${NV_CUDA_COMPAT_PACKAGE} \
        ${NV_CUDNN_PACKAGE} \  
        cuda-libraries-${CMAJ}-${CMIN}=${NV_CUDA_LIB_VERSION} \
-       ${NV_LIBNPP_PACKAGE} \
-       cuda-nvtx-${CMAJ}-${CMIN}=${NV_NVTX_VERSION} \
-       libcusparse-${CMAJ}-${CMIN}=${NV_LIBCUSPARSE_VERSION} \
-       ${NV_LIBCUBLAS_PACKAGE} \
-       ${NV_LIBNCCL_PACKAGE} \
+       #${NV_LIBNPP_PACKAGE} \
+       #cuda-nvtx-${CMAJ}-${CMIN}=${NV_NVTX_VERSION} \
+       #libcusparse-${CMAJ}-${CMIN}=${NV_LIBCUSPARSE_VERSION} \
+       #${NV_LIBCUBLAS_PACKAGE} \
+       #${NV_LIBNCCL_PACKAGE} \
     && ln -s cuda-${CMAJ}.${CMIN} /usr/local/cuda \
     && rm -rf /var/lib/apt/lists/*
 
@@ -51,7 +51,8 @@ ENV PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}" \
     NVIDIA_VISIBLE_DEVICES="all" \
     NVIDIA_DRIVER_CAPABILITIES="compute,utility"
 # Keep apt from auto upgrading packages. See https://gitlab.com/nvidia/container-images/cuda/-/issues/88
-RUN apt-mark hold "libcublas-${CMAJ}-${CMIN}" "libnccl2" "libcudnn8"
+#RUN apt-mark hold "libcublas-${CMAJ}-${CMIN}" "libnccl2" "libcudnn8"
+RUN apt-mark hold "libcudnn8"
 
 # ------------ JUPYTER NOTEBOOK Setup -------
 # needs to be correct user
