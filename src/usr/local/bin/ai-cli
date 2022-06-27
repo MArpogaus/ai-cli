@@ -492,13 +492,8 @@ case ${CMD} in
 		docker build \
 			-t ${IMAGE_NAME} \
 			-t ai-cli/workspace-cuda:"$IMAGE_TAG" \
-			--build-arg=ARG_NB_USER="$USER" \
-			--build-arg=ARG_NB_UID="$NB_UID" \
-			--build-arg=ARG_NB_GID="$NB_GID" \
-			--build-arg=ARG_HOME="/home/${USER}" \
 			--build-arg=CMAJ="$CMAJ" \
 			--build-arg=CMIN="$CMIN" \
-			--build-arg=TARGETARCH="amd64" \
 			/usr/local/share/ai-cli-docker/workspace-cuda/
 		fi
 		;;
