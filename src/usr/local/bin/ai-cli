@@ -373,7 +373,7 @@ do
 			RUNTIME=${OPTARG};; # needs to be placed after g flag to work
 		n)  # Specify experiment @NAME
 			MLFLOW_EXPERIMENT_NAME=${OPTARG};;
-		c) # build with cuda support. Specify @CUDA version to use. Tags image with 'c<VERSION>' by default.
+		c) # Cuild with cuda support. Specify @CUDA version to use. Tags image with 'c<VERSION>' by default.
 			valid_c=false
 			for token in "$@"; do
 				if [[ $token = "build" ]]; then
