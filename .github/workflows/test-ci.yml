@@ -14,7 +14,7 @@ jobs:
        - name: Execute Tests      
          id: exec-tests 
          run: |
-           ./CI/run-tests.sh 1> stdout.txt 2> ts > stderr.txt
+           ./CI/run-tests.sh 1> stdout.txt 2> >( ts > stderr.txt )
          continue-on-error: true
        - name: show stdout
          run: cat stdout.txt
