@@ -12,7 +12,7 @@ bash -x ai-cli init
 echo "exec init finished successfully"
 
 echo "start mlflow"
-bash -ex ai-cli start-server
+#bash -ex ai-cli start-server
 echo "start mlflow finished successfully"
 
 #echo "exec run"
