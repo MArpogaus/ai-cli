@@ -18,4 +18,7 @@ git config user.email "git-dummy@mail"
 sudo mkdir -p /usr/share/ai-cli/htpasswd/
 sudo htpasswd -Bb -c "/usr/share/ai-cli/htpasswd/${USER}-mlflow.localhost" ${USER} 1234
 
+# install ts for timed outputs
+sudo apt-get install moreutils
+
 echo "setup finished"

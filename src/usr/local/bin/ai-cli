@@ -293,6 +293,7 @@ HTPASSWD_PATH=/usr/share/ai-cli/htpasswd
 HOME_PATH="/home/${USER}/.local/share/ai-cli/home"
 EXTENSION_PATH="/home/${USER}/.local/share/ai-cli/extensions"
 MLFLOW_DATA=/mnt/data/$USER/mlflow
+CONFIG_PATH=/etc/ai-cli/config
 
 # Check if config path exists
 [[ ! -e $DOCKER_COMPOSE_PATH ]] && {
@@ -303,7 +304,7 @@ MLFLOW_DATA=/mnt/data/$USER/mlflow
 
 # Variable definitions #########################################################
 # read in configuration file
-source /etc/ai-cli/config
+source $CONFIG_PATH
 
 # define other helper variables
 MLFLOW_LOCAL_PROJECT="$PWD"
@@ -318,7 +319,6 @@ JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser"
 JUPYTER_CONTAINER=$(docker ps -qf name=".*jupyter.*")
 NOTEBOOK_VIRTUAL_HOST=${USER}-notebook.$URLNAME
 LAB_VIRTUAL_HOST=${USER}-lab.$URLNAME
-#DOCKER_WORKSPACE="$(docker images -qf "reference=${USER}-workspace_workspace")" #TODO: potentially obsolete 
 
 # default runtime
 # read from docker and extract value
