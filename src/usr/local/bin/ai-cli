@@ -102,6 +102,7 @@ init(){
 	docker network create ${USER}_mlflow_bridge &> /dev/null || true # to continue if already exists
 	echo "INFO: init ${HOME_PATH}"
 	mkdir -p ${HOME_PATH}
+	cp -r "${CONFIG_FILES_PATH}/.condarc" "${HOME_PATH}"
 	echo "INFO: init ${EXTENSION_PATH}"
 	mkdir -p $EXTENSION_PATH
 	echo "INFO: Initialization complete"	
@@ -294,6 +295,7 @@ HOME_PATH="/home/${USER}/.local/share/ai-cli/home"
 EXTENSION_PATH="/home/${USER}/.local/share/ai-cli/extensions"
 MLFLOW_DATA=/mnt/data/$USER/mlflow
 CONFIG_PATH=/etc/ai-cli/config
+CONFIG_FILES_PATH=/etc/ai-cli/files
 
 # Check if config path exists
 [[ ! -e $DOCKER_COMPOSE_PATH ]] && {
