@@ -23,9 +23,5 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN pip install mlflow
 
-ADD entrypoint.sh /entrypoint.sh
-
 WORKDIR /app
-
-ENTRYPOINT ["/entrypoint.sh"]
 
