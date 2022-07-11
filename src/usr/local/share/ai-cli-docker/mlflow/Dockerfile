@@ -14,35 +14,14 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-FROM python:3-alpine
-
+FROM python:3.7-slim
 ENV DEBIAN_FRONTEND=noninteractive \
     CONDA_DIR=/opt/conda \
     SHELL=/bin/bash \
     PATH="${CONDA_DIR}/bin:${PATH}"
 
 
-#RUN apk add git
-RUN apk update
-RUN apk add make automake gcc g++ subversion python3-dev
-RUN apk add --no-cache --update-cache gfortran build-base wget libpng-dev openblas-dev
-RUN apk add py3-scipy
-# Install python/pip
-#ENV PYTHONUNBUFFERED=1
-#RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
-#RUN python3 -m ensurepip
-#RUN pip3 install --no-cache --upgrade pip setuptools
-
-#RUN apt-get update -q && \
-#    apt-get install -q -y \
-#        git \
-#        python \
-#        pip && \
-#    apt-get clean && \
-#    rm -rf /var/lib/apt/lists/*
-
-# forward python prints without buffering, setup mlflow
-RUN set -x && pip install mlflow
+RUN pip install mlflow
 
 ADD entrypoint.sh /entrypoint.sh
 

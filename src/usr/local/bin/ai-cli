@@ -105,6 +105,8 @@ init(){
 	cp -r "${CONFIG_FILES_PATH}/.condarc" "${HOME_PATH}"
 	echo "INFO: init ${EXTENSION_PATH}"
 	mkdir -p $EXTENSION_PATH
+	echo "INFO: init mlflow server"
+	docker build -t "${USER}-server_server" /usr/local/share/ai-cli-docker/mlflow/
 	echo "INFO: Initialization complete"	
 }
 check_init(){
@@ -445,6 +447,12 @@ export IMAGE_NAME
 export EXTENSION_PATH
 export RUNTIME
 export GPUS
+
+#echo "INFO: USER=${USER}"
+#echo "INFO: DOCKER_USER=${DOCKER_USER}"
+#echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
+#echo "INFO: URLNAME=${URLNAME}"
+#echo "INFO: MLFLOWPORT=${MLFLOWPORT}"
 
 # show docker info ####################################################################
 echo "INFO: Using image ${IMAGE_NAME}"
