@@ -154,7 +154,7 @@ disambiguate_host(){
 	hname=$1
 	instances=""
 	if [ -n "$JUPYTER_CONTAINER" ]; then
-		hosts=$( echo "$JUPYTER_CONTAINER" | xargs docker inspect -f "                
+		hosts=$( echo "$JUPYTER_CONTAINER" | xargs docker inspect -f '                
 		{{range .Config.Env }}
                         {{with $line := (split . "=")}}
                                 {{if eq (index . 0) "VIRTUAL_HOST"}}
@@ -162,7 +162,7 @@ disambiguate_host(){
                                 {{end}}
                         {{end}}
                 {{end}}
-		")
+		')
 		# instances from same user with same name
 		# cat is needed to prevent exit on negative result
 		# note that expected format is hardcoded here
@@ -232,21 +232,24 @@ show_jupyter_status(){
 		{{end}}
 		')
 		jupyter_cudas=$( echo "$JUPYTER_CONTAINER" | xargs docker container inspect -f '	
-		{{range .Config.Env}}
+		{{ $found := "False" }}
+		{{range .Config.Env}}	
 			{{with $line := (split . "=")}}
 				{{if eq (index . 0) "CUDA_VERSION"}}
 					{{index . 1}}
+					{{ $found = "True" }}
 				{{end}}
 			{{end}}
 		{{end}}
-
+		{{ if eq $found "False"  }}
+		   None
+		{{end}}
 		')
 		
 		# convert to arrays to be able to index lists
 		jupyter_sourcepaths=($(echo $jupyter_sourcepaths))
 		jupyter_urls=($(echo $jupyter_urls))
 		jupyter_cudas=($(echo $jupyter_cudas))
-		
 		otheruserjups=0
 		# print aligned
 		printf "   %*s %*s %*s
