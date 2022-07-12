@@ -22,13 +22,6 @@ services:
     user: ${DOCKER_USER}
     container_name: ${USER}-mlflow-run
     runtime: ${RUNTIME}
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: [ "${GPUS}" ] 
-              capabilities: [gpu]
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
@@ -52,13 +45,6 @@ services:
     user: ${DOCKER_USER}
     container_name: ${USER}-jupyter
     runtime: ${RUNTIME}
-    deploy:
-      resources:
-        reservations:
-          devices: 
-            - driver: nvidia
-              device_ids: [ "${GPUS}" ]
-              capabilities: [gpu]
     working_dir: /home/${USER}
     volumes:
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
