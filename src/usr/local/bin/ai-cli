@@ -73,7 +73,7 @@ docker_run(){
 	shift
 	dc workspace --project-directory "$PWD" \
 		run $RUN_ARGS \
-		$SERVICE_NAME $*
+		$SERVICE_NAME "/usr/local/bin/start.sh $*"
 }
 
 basic_auth(){
@@ -103,6 +103,7 @@ init(){
 	echo "INFO: init ${HOME_PATH}"
 	mkdir -p ${HOME_PATH}
 	cp -r "${CONFIG_FILES_PATH}/.condarc" "${HOME_PATH}"
+	cp    "${CONFIG_FILES_PATH}/.bashrc" "${HOME_PATH}"
 	echo "INFO: init ${EXTENSION_PATH}"
 	mkdir -p $EXTENSION_PATH
 	echo "INFO: init mlflow server"

@@ -34,9 +34,15 @@ RUN set -x && \
     mamba install --quiet --yes \
     'mlflow' \
     'nb_conda_kernels' && \
-    mamba clean --all -f -y 
+    mamba clean --all -f -y
 
 RUN fix-permissions "${CONDA_DIR}"
+
+RUN mkdir /usr/local/bin/before-notebook.d/
+RUN echo "echo Hello World" >> /usr/local/bin/before-notebook.d/conda.sh
+RUN chmod +x /usr/local/bin/before-notebook.d/conda.sh
+
+RUN printf "/usr/local/bin/before-notebook.d/conda.sh\nexec \$*\n" > /usr/local/bin/start.sh
 
 # Switch user to avoid accidental container runs as root
 USER $NB_USER
