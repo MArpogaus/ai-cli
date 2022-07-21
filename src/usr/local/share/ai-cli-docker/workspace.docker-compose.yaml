@@ -22,7 +22,7 @@ services:
     user: ${DOCKER_USER}
     container_name: ${USER}-mlflow-run
     runtime: ${RUNTIME}
-    volumes:
+    volumes: &mounted_volumes
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
       - /home/${USER}/.local/share/ai-cli/home:/home/${USER}
@@ -45,13 +45,7 @@ services:
     container_name: ${USER}-jupyter
     runtime: ${RUNTIME}
     working_dir: /home/${USER}
-    volumes:
-      - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
-      - ${MLFLOW_DATA}:/mlruns
-      - /home/${USER}/.local/share/ai-cli/home:/home/${USER}/
-      - /home/${USER}/.local/share/ai-cli/jupyter/lab/extensions:/opt/conda/share/jupyter/lab/extensions
-      - /etc/passwd:/etc/passwd:ro
-      - /etc/group:/etc/group:ro
+    volumes: *mounted_volumes
     environment:
       MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
       NVIDIA_VISIBLE_DEVICES: "${GPUS}"

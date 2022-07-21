@@ -39,10 +39,10 @@ RUN set -x && \
 RUN fix-permissions "${CONDA_DIR}"
 
 RUN mkdir /usr/local/bin/before-notebook.d/
-RUN echo "echo Hello World" >> /usr/local/bin/before-notebook.d/conda.sh
+RUN echo "mamba activate ai-cli" >> /usr/local/bin/before-notebook.d/conda.sh
 RUN chmod +x /usr/local/bin/before-notebook.d/conda.sh
 
-RUN printf "/usr/local/bin/before-notebook.d/conda.sh\nexec \$*\n" > /usr/local/bin/start.sh
+RUN printf "#!/bin/bash -il\nsource ~/.bashrc && source /usr/local/bin/before-notebook.d/conda.sh\nexec \$*\n" > /usr/local/bin/start.sh
 
 # Switch user to avoid accidental container runs as root
 USER $NB_USER

@@ -1,3 +1,4 @@
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/opt/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
@@ -11,4 +12,10 @@ else
     fi
 fi
 unset __conda_setup
+
+if [ -f "/opt/conda/etc/profile.d/mamba.sh" ]; then
+    . "/opt/conda/etc/profile.d/mamba.sh"
+fi
 # <<< conda initialize <<<
+
+conda deactivate
