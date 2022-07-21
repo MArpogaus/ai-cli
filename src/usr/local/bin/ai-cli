@@ -106,7 +106,9 @@ init(){
 	cp    "${CONFIG_FILES_PATH}/.bashrc" "${HOME_PATH}"
 	mkdir -p $EXTENSION_PATH
 	chmod 777 $EXTENSION_PATH
-	docker_run workspace mamba create -n ai-cli > /dev/null 
+	echo "INFO: init docker workspace"
+	ai-cli build &> /dev/null
+	docker_run workspace mamba create --yes -n ai-cli &> /dev/null 
 	echo "INFO: init mlflow server"
 	docker build -t "${USER}-server_server" /usr/local/share/ai-cli-docker/mlflow/ &> /dev/null
 	echo "INFO: Initialization complete"	
