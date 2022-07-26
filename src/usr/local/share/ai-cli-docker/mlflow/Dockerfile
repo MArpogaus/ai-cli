@@ -20,8 +20,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     SHELL=/bin/bash \
     PATH="${CONDA_DIR}/bin:${PATH}"
 
-
-RUN pip install mlflow==1.27.0
+ARG MLFLOW_VERSION
+RUN pip install mlflow==$MLFLOW_VERSION
 
 WORKDIR /app
 

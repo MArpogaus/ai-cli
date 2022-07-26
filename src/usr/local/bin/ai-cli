@@ -326,7 +326,7 @@ GIT_USER_NAME="'$(git config --get user.name)'" # git used in workspace-base/ent
 GIT_USER_EMAIL="$(git config --get user.email)"
 MLFLOW_VIRTUAL_HOST=${USER}-mlflow.$URLNAME
 JUPYTER_CMD="jupyter notebook --notebook-dir=/app --ip 0.0.0.0 --no-browser"
-JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser"
+JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser --collaborative"
 JUPYTER_CONTAINER=$(docker ps -qf name=".*jupyter.*")
 NOTEBOOK_VIRTUAL_HOST=${USER}-notebook.$URLNAME
 LAB_VIRTUAL_HOST=${USER}-lab.$URLNAME
@@ -342,6 +342,7 @@ IMAGE_PREFIX=ai-cli/${USER}
 
 # CLI args defaults
 GPUS=""
+MLFLOW_VERSION="1.26.0"
 RUN_VOLUMES=()
 RUN_ARGS="--rm"
 
@@ -454,8 +455,9 @@ export IMAGE_NAME
 export EXTENSION_PATH
 export RUNTIME
 export GPUS
+export MLFLOW_VERSION
 
-#echo "INFO: USER=${USER}"
+#echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
 #echo "INFO: DOCKER_USER=${DOCKER_USER}"
 #echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
 #echo "INFO: URLNAME=${URLNAME}"
@@ -482,7 +484,11 @@ case ${CMD} in
 		dc server down ;;
 	restart-server) # restart mlflow server
 		dc server down
-		dc server up -d --build ;;
+		ai-cli build-server
+		dc server up -d;;
+	build-server)
+		dc server build --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION
+		;;
 	status) # show status of your environment
 		show_status ;;
 	build) # build image from dockerfile
@@ -497,6 +503,7 @@ case ${CMD} in
 			--build-arg=ARG_NB_UID="$NB_UID" \
 			--build-arg=ARG_NB_GID="$NB_GID" \
 			--build-arg=ARG_HOME="/home/${USER}" \
+			--build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
 		       	/usr/local/share/ai-cli-docker/workspace-base/
 		
 		if [ ${CUDA_VERSION} ]; then 

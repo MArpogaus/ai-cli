@@ -21,6 +21,7 @@ USER root
 ARG ARG_NB_USER \
     ARG_NB_UID \
     ARG_NB_GID \
+    MLFLOW_VERSION \
     ARG_HOME
 
 ENV NB_USER=${ARG_NB_USER} \
@@ -31,7 +32,7 @@ ENV NB_USER=${ARG_NB_USER} \
 
 RUN set -x && \
     mamba install --quiet --yes \
-    'mlflow=1.27.0' \
+    mlflow=${MLFLOW_VERSION} \
     'nb_conda_kernels' && \
     mamba clean --all -f -y
 
