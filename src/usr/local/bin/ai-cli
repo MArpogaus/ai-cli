@@ -110,7 +110,7 @@ init(){
 	ai-cli build &> /dev/null
 	docker_run workspace mamba create --yes -n ai-cli &> /dev/null 
 	echo "INFO: init mlflow server"
-	docker build -t "${USER}-server_server" /usr/local/share/ai-cli-docker/mlflow/ &> /dev/null
+	ai-cli build-server &> /dev/null
 	echo "INFO: Initialization complete"	
 }
 check_init(){
@@ -342,7 +342,7 @@ IMAGE_PREFIX=ai-cli/${USER}
 
 # CLI args defaults
 GPUS=""
-MLFLOW_VERSION="1.26.0"
+MLFLOW_VERSION="1.27.0"
 RUN_VOLUMES=()
 RUN_ARGS="--rm"
 
@@ -351,8 +351,6 @@ RUN_ARGS="--rm"
 # The init method fixes issues that can be solved automatically. This is necessary
 # setup user workspace before first use.
 [ "$1" = init ] || check_init || {
-	v=$?
-	echo "ERROR: Uninitialized. You may want to run ai-cli init and try again."
 	exit $v
 }
 
@@ -486,7 +484,7 @@ case ${CMD} in
 		dc server down
 		ai-cli build-server
 		dc server up -d;;
-	build-server)
+	build-server) # build mlflow server
 		dc server build --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION
 		;;
 	status) # show status of your environment
