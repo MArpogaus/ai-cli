@@ -482,7 +482,7 @@ case ${CMD} in
 		dc server down ;;
 	restart-server) # restart mlflow server
 		dc server down
-		dc server up -d ;;
+		dc server up -d --build ;;
 	status) # show status of your environment
 		show_status ;;
 	build) # build image from dockerfile

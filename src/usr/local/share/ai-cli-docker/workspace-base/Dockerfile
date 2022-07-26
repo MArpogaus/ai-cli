@@ -21,8 +21,7 @@ USER root
 ARG ARG_NB_USER \
     ARG_NB_UID \
     ARG_NB_GID \
-    ARG_HOME \
-    ARG_INSTALL_CUDA
+    ARG_HOME
 
 ENV NB_USER=${ARG_NB_USER} \
     NB_UID=${ARG_NB_UID} \
@@ -32,7 +31,7 @@ ENV NB_USER=${ARG_NB_USER} \
 
 RUN set -x && \
     mamba install --quiet --yes \
-    'mlflow' \
+    'mlflow=1.27.0' \
     'nb_conda_kernels' && \
     mamba clean --all -f -y
 
