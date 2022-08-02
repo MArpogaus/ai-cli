@@ -42,10 +42,8 @@ RUN mkdir /usr/local/bin/before-notebook.d/
 RUN echo "mamba activate ai-cli" >> /usr/local/bin/before-notebook.d/conda.sh
 RUN chmod +x /usr/local/bin/before-notebook.d/conda.sh
 
-# Switch user to avoid accidental container runs as root
-ADD entrypoint.sh /entrypoint.sh
-WORKDIR /app
-ENTRYPOINT ["/entrypoint.sh"]
-USER $NB_USER
+RUN printf "#!/bin/bash -il\nsource ~/.bashrc && source /usr/local/bin/before-notebook.d/conda.sh\nexec \$*\n" > /usr/local/bin/start.sh
 
+# Switch user to avoid accidental container runs as root
+USER $NB_USER
 

@@ -73,7 +73,7 @@ docker_run(){
 	shift
 	dc workspace --project-directory "$PWD" \
 		run $RUN_ARGS \
-		$SERVICE_NAME "$*"
+		$SERVICE_NAME "/usr/local/bin/start.sh $*"
 }
 
 basic_auth(){
