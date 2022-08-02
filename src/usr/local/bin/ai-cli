@@ -345,6 +345,7 @@ GPUS=""
 MLFLOW_VERSION="1.27.0"
 RUN_VOLUMES=()
 RUN_ARGS="--rm"
+CONDA_DIR="/home/${USER}/.conda/envs/"
 
 # CHECK INIT ###################################################################
 # Looks at known dependencies and errors if it finds at least one of them unmet.
@@ -454,6 +455,7 @@ export EXTENSION_PATH
 export RUNTIME
 export GPUS
 export MLFLOW_VERSION
+export CONDA_DIR
 
 #echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
 #echo "INFO: DOCKER_USER=${DOCKER_USER}"

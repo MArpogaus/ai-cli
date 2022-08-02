@@ -32,6 +32,7 @@ services:
       - /dev:/dev
     environment:
      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
+     CONDA_ENVS_PATH: ${CONDA_DIR}
      NVIDIA_VISIBLE_DEVICES: "${GPUS}"
     working_dir: /app
     env_file:
@@ -48,6 +49,7 @@ services:
     volumes: *mounted_volumes
     environment:
       MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
+      CONDA_ENVS_PATH: ${CONDA_DIR}
       NVIDIA_VISIBLE_DEVICES: "${GPUS}"
       VIRTUAL_HOST: ${JUPYTER_VIRTUAL_HOST}
       VIRTUAL_PORT: ${JUPYTERPORT}
