@@ -16,6 +16,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 set -e
 
+source ~/.bashrc
+source /usr/local/bin/before-notebook.d/conda.sh
+
 [[ -n $GIT_USER_NAME ]] && git config --global user.name $GIT_USER_NAME
 [[ -n $GIT_USER_EMAIL ]] && git config --global user.email $GIT_USER_EMAIL
 
