@@ -342,7 +342,6 @@ IMAGE_PREFIX=ai-cli/${USER}
 
 # CLI args defaults
 GPUS=""
-MLFLOW_VERSION="1.27.0"
 RUN_VOLUMES=()
 RUN_ARGS="--rm"
 CONDA_DIR="/home/${USER}/.conda/envs/"
