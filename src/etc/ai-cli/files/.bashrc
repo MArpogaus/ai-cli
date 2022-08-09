@@ -18,4 +18,3 @@ if [ -f "/opt/conda/etc/profile.d/mamba.sh" ]; then
 fi
 # <<< conda initialize <<<
 
-conda deactivate
