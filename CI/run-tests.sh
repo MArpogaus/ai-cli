@@ -16,5 +16,5 @@ bash -ex ai-cli start-server
 echo "CI: start mlflow finished successfully"
 
 echo "CI: exec run"
-bash -ex "cd examples/run_basic && bash -x ./ci-tests.sh "
+bash -ex "cd examples/basic && bash -x ./ci-tests.sh "
 echo "CI: exec run finished successfully"
