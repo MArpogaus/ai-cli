@@ -2,19 +2,19 @@
 
 set -ex
 
-echo "Check if command exists"
+echo "CI: Check if command exists"
 type ai-cli
 
 # both init and upgrade are needed to successfully use ai-cli run 
 
-echo "exec init"
+echo "CI: exec init"
 bash -x ai-cli init
-echo "exec init finished successfully"
+echo "CI: exec init finished successfully"
 
-echo "start mlflow"
+echo "CI: start mlflow"
 bash -ex ai-cli start-server
-echo "start mlflow finished successfully"
+echo "CI: start mlflow finished successfully"
 
-echo "exec run"
+echo "CI: exec run"
 bash -ex "cd examples/run_basic && bash -x ./ci-tests.sh "
-echo "exec run finished successfully"
+echo "CI: exec run finished successfully"
