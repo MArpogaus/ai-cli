@@ -17,5 +17,6 @@ echo "CI: start mlflow finished successfully"
 
 echo "CI: exec run"
 bash -ex "pwd"
+bash -ex "ls -al"
 bash -ex "cd examples/basic && bash -x ./ci-tests.sh "
 echo "CI: exec run finished successfully"
