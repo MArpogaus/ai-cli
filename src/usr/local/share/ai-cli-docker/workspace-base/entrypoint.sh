@@ -1,5 +1,4 @@
-#!/bin/bash -il
-set -e
+#!/bin/bash
 run_hooks () {
 	if [[ ! -d "${1}" ]] ; then
 		return
