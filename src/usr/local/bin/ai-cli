@@ -547,9 +547,9 @@ case ${CMD} in
       exit 1
     fi
 
-    echo "INFO: MLFlow data path: $MLFLOW_DATA"
+    echo "INFO: MLflow data path: $MLFLOW_DATA"
     if [[ -n $MLFLOW_EXPERIMENT_NAME ]]; then
-      echo "INFO: MLFlow experiment name: $MLFLOW_EXPERIMENT_NAME"
+      echo "INFO: MLflow experiment name: $MLFLOW_EXPERIMENT_NAME"
     fi
     export MLFLOW_LOCAL_PROJECT
     echo "INFO: Running MLProject from $MLFLOW_LOCAL_PROJECT"
