@@ -304,6 +304,7 @@ done
 
 # Variable definitions ########################################################
 MLFLOW_LOCAL_PROJECT="$PWD"
+MLFLOW_ENV_FILE=$DOCKER_COMPOSE_PATH/run.env
 DOCKER_USER=$(id -u):$(id -g)
 NB_UID=$(id -u)
 NB_GID=$(id -g)
@@ -418,25 +419,23 @@ fi
 
 # Exports #####################################################################
 # Export env for docker-compose
-if [[ -e $MLFLOW_ENV_FILE ]]; then
-  export MLFLOW_ENV_FILE
-fi
-
-export MLFLOWPORT
-export JUPYTERPORT
-export URLNAME
-export MLFLOW_DATA
-export DOCKER_USER
-export NB_UID
-export NB_GID
-export GIT_USER_NAME
-export GIT_USER_EMAIL
-export IMAGE_NAME
-export EXTENSION_PATH
-export RUNTIME
-export GPUS
-export MLFLOW_VERSION
 export CONDA_DIR
+export DOCKER_USER
+export EXTENSION_PATH
+export GIT_USER_EMAIL
+export GIT_USER_NAME
+export GPUS
+export HOME_PATH
+export IMAGE_NAME
+export JUPYTERPORT
+export MLFLOWPORT
+export MLFLOW_DATA
+export MLFLOW_ENV_FILE
+export MLFLOW_VERSION
+export NB_GID
+export NB_UID
+export RUNTIME
+export URLNAME
 
 #echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
 #echo "INFO: DOCKER_USER=${DOCKER_USER}"
@@ -487,7 +486,7 @@ case ${CMD} in
       --build-arg=ARG_NB_GID="$NB_GID" \
       --build-arg=ARG_HOME="/home/${USER}" \
       --build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
-      /usr/local/share/ai-cli-docker/workspace-base/
+      $DOCKER_COMPOSE_PATH/workspace-base/
 
     if [ ${CUDA_VERSION} ]; then
       echo "INFO: Building workspace-cuda"
@@ -501,7 +500,7 @@ case ${CMD} in
         -t ai-cli/workspace-cuda:"$IMAGE_TAG" \
         --build-arg=CMAJ="$CMAJ" \
         --build-arg=CMIN="$CMIN" \
-        /usr/local/share/ai-cli-docker/workspace-cuda/
+        $DOCKER_COMPOSE_PATH/workspace-cuda/
     fi
     ;;
   bash) # start bash shell inside container

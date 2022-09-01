@@ -1,5 +1,5 @@
-DOCKER_COMPOSE_PATH=/usr/local/share/ai-cli-docker/
-HTPASSWD_PATH=/usr/share/ai-cli/htpasswd
+DOCKER_COMPOSE_PATH=/usr/local/share/ai-cli/docker/
+HTPASSWD_PATH=/var/local/ai-cli/htpasswd
 HOME_PATH="${HOME}/.local/share/ai-cli/home"
 EXTENSION_PATH="${HOME}/.local/share/ai-cli/extensions"
 MLFLOW_DATA=/mnt/data/$USER/mlflow

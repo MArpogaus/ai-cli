@@ -25,7 +25,7 @@ services:
     volumes: &mounted_volumes
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
-      - /home/${USER}/.local/share/ai-cli/home:/home/${USER}
+      - ${HOME_PATH}:/home/${USER}
       - ${EXTENSION_PATH}:/opt/conda/share/jupyter/lab/extensions
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -36,7 +36,7 @@ services:
      NVIDIA_VISIBLE_DEVICES: "${GPUS}"
     working_dir: /app
     env_file:
-      - ${MLFLOW_ENV_FILE:-/usr/local/share/ai-cli-docker/run.env}
+      - ${MLFLOW_ENV_FILE}
     networks:
       - mlflow_bridge
 

@@ -262,4 +262,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,windows,emacs,vim,python
-home/.local/share/ai-cli-docker/conda/*
