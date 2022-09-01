@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ai-cli run -n basic .
+ai-cli -n basic run .
