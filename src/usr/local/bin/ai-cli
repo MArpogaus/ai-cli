@@ -118,7 +118,7 @@ check_init() {
 	err_cnt=0
 	# check dependencies that can be set up using init()
 	if [[ -n $(docker network inspect $(docker network ls -q) | grep "${USER}_mlflow_bridge") ]] &&
-		[[ -w "${HOME_PATH}" ]]; then
+		[[ -w ${HOME_PATH} ]]; then
 		: # null command
 	else
 		echo ""
@@ -134,8 +134,8 @@ check_init() {
 	fi
 
 	# check for dependencies that currently need to be set up manually
-	if [[ ! -n $(git config user.name) ]] ||
-		[[ ! -n $(git config user.email) ]]; then
+	if [[ -z $(git config user.name) ]] ||
+		[[ -z $(git config user.email) ]]; then
 		echo ""
 		echo "################################################################"
 		echo ""
@@ -259,7 +259,7 @@ show_jupyter_status() {
 
 		for ((i = 0; i < ${#jupyter_urls[@]}; ++i)); do
 			# check user by looking if url _starts_ with user
-			if [[ ! "${jupyter_urls[$i]}" == "$USER"* ]]; then
+			if [[ ${jupyter_urls[$i]} != "$USER"* ]]; then
 				otheruserjups=$((otheruserjups + 1))
 			else
 				# numbers are for aligned formatting (may be needed to be improved in future)
@@ -362,7 +362,7 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
 				valid_v=true
 			fi
 		done
-		if [[ $valid_v = false ]]; then
+		if [[ $valid_v == false ]]; then
 			echo "ERROR: -v used in wrong context. Only valid when command is in list: ${valid_commands}."
 			exit 1
 		fi
@@ -375,20 +375,17 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
 		GPUS=${OPTARG}
 		RUNTIME="nvidia"
 		;;
-	r) # Specify specific @RUNTIME. Default is read from docker info.
-		RUNTIME=${OPTARG} # needs to be placed after g flag to work
-		;;
 	n) # Specify experiment @NAME
 		MLFLOW_EXPERIMENT_NAME=${OPTARG}
 		;;
 	c) # Build with cuda support. Specify @CUDA version to use. Tags image with 'c<VERSION>' by default.
 		valid_c=false
 		for token in "$@"; do
-			if [[ $token = "build" ]]; then
+			if [[ $token == "build" ]]; then
 				valid_c=true
 			fi
 		done
-		if [[ $valid_c = false ]]; then
+		if [[ $valid_c == false ]]; then
 			echo "ERROR: -c used in wrong context. Only valid when you call 'build'."
 			exit 1
 		fi
@@ -399,11 +396,11 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
 	i) # Specify docker @IMAGE to be used.
 		valid_i=true
 		for token in "$@"; do
-			if [[ $token = "build" ]]; then
+			if [[ $token == "build" ]]; then
 				valid_i=false
 			fi
 		done
-		if [[ $valid_i = false ]]; then
+		if [[ $valid_i == false ]]; then
 			echo "ERROR: -i used in wrong context. Not valid when you call 'build' use -t or -c instead."
 			exit 1
 		fi
@@ -426,7 +423,7 @@ if [[ -n $MLFLOW_EXPERIMENT_NAME ]]; then
 fi
 
 # BUILD IMAGE NAME TO USE
-if [[ -z "$IMAGE_NAME" ]]; then
+if [[ -z $IMAGE_NAME ]]; then
 	IMAGE_NAME=${IMAGE_PREFIX}:${IMAGE_TAG}
 fi
 
