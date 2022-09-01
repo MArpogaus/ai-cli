@@ -101,8 +101,6 @@ init() {
   docker network create ${USER}_mlflow_bridge &>/dev/null || true # to continue if already exists
   echo "INFO: init ${HOME_PATH}"
   mkdir -p ${HOME_PATH}
-  cp -r "${CONFIG_FILES_PATH}/.condarc" "${HOME_PATH}"
-  cp "${CONFIG_FILES_PATH}/.bashrc" "${HOME_PATH}"
   mkdir -p $EXTENSION_PATH
   chmod 777 $EXTENSION_PATH
   echo "INFO: init docker workspace"
@@ -281,7 +279,6 @@ show_mlflow_status() {
 
 }
 show_status() {
-
   show_docker_associated_images
   echo ""
   show_mlflow_status
@@ -289,27 +286,23 @@ show_status() {
   show_jupyter_status
 }
 
-# Define Paths on HOST system #################################################################
-DOCKER_COMPOSE_PATH=/usr/local/share/ai-cli-docker/
-HTPASSWD_PATH=/usr/share/ai-cli/htpasswd
-HOME_PATH="/home/${USER}/.local/share/ai-cli/home"
-EXTENSION_PATH="/home/${USER}/.local/share/ai-cli/extensions"
-MLFLOW_DATA=/mnt/data/$USER/mlflow
+# Read configuration file #####################################################
 CONFIG_PATH=/etc/ai-cli/config
-CONFIG_FILES_PATH=/etc/ai-cli/files
-
-# Check if config path exists
-[[ ! -e $DOCKER_COMPOSE_PATH ]] && {
-  echo "ERROR: Required files not found!"
-  echo "       Check your installation"
-  exit 1
-}
-
-# Variable definitions #########################################################
-# read in configuration file
 source $CONFIG_PATH
 
-# define other helper variables
+# Check if paths correctly configured
+for p in DOCKER_COMPOSE_PATH HTPASSWD_PATH MLFLOW_DATA; do
+  [[ -z ${!p} ]] && {
+    echo "ERROR: ${p} is undefined! Check your configuration in $CONFIG_PATH"
+    exit 1
+  }
+  [[ ! -e ${!p} ]] && {
+    echo "ERROR: ${p} (${!p}) dos not exists! Check your configuration in $CONFIG_PATH"
+    exit 1
+  }
+done
+
+# Variable definitions ########################################################
 MLFLOW_LOCAL_PROJECT="$PWD"
 DOCKER_USER=$(id -u):$(id -g)
 NB_UID=$(id -u)
