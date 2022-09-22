@@ -245,13 +245,25 @@ show_jupyter_status() {
 		{{end}}
 		')
 
+    jupyter_tokens=""
+    for cont in $JUPYTER_CONTAINER; do
+      jupyter_token=$(docker exec $cont jupyter server list 2>/dev/null | sed -rn 's/(https?:\/\/).*token=([a-z0-9]+)\b.*/\2/p') 
+      if [ -z "$jupyter_token" ]; then
+        jupyter_token="None";
+      fi
+      jupyter_tokens="$jupyter_tokens $jupyter_token";
+    done
+    echo $jupyter_tokens
+
+
     # convert to arrays to be able to index lists
     jupyter_sourcepaths=($(echo $jupyter_sourcepaths))
     jupyter_urls=($(echo $jupyter_urls))
     jupyter_cudas=($(echo $jupyter_cudas))
+    jupyter_tokens=($(echo $jupyter_tokens))
     otheruserjups=0
     # print aligned
-    printf "   %*s %*s %*s\n" -50 "JUPYTER URL" -50 "(JUPYTER WORKSPACE)" -50 "(RUNNING CUDA)"
+    printf "   %*s %*s %*s %*s\n" -50 "JUPYTER URL" -50 "JUPYTER WORKSPACE" -50 "RUNNING CUDA" -50 "TOKEN"
 
     for ((i = 0; i < ${#jupyter_urls[@]}; ++i)); do
       # check user by looking if url _starts_ with user
@@ -259,7 +271,7 @@ show_jupyter_status() {
         otheruserjups=$((otheruserjups + 1))
       else
         # numbers are for aligned formatting (may be needed to be improved in future)
-        printf "   %*s %*s %*s\n" -50 "https://${jupyter_urls[$i]}" -50 "(${jupyter_sourcepaths[$i]})" -50 "(CUDA ${jupyter_cudas[$i]})"
+        printf "   %*s %*s %*s %*s\n" -50 "https://${jupyter_urls[$i]}" -50 "${jupyter_sourcepaths[$i]}" -50 "CUDA ${jupyter_cudas[$i]}" -50 "${jupyter_tokens[$i]}"
       fi
     done
     echo ""
