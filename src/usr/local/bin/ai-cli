@@ -213,7 +213,6 @@ show_jupyter_status() {
   if [ -n "$JUPYTER_CONTAINER" ]; then
     # we use go templates to build the desired output
     # numbers below are arbitrary max-width borders used to align columns
-    echo "Jupyter Server"
     jupyter_sourcepaths=$(echo "$JUPYTER_CONTAINER" | xargs docker container inspect -f '	
 		{{range .Mounts}}
 			{{if eq .Destination "/app"}}
@@ -253,8 +252,6 @@ show_jupyter_status() {
       fi
       jupyter_tokens="$jupyter_tokens $jupyter_token";
     done
-    echo $jupyter_tokens
-
 
     # convert to arrays to be able to index lists
     jupyter_sourcepaths=($(echo $jupyter_sourcepaths))
