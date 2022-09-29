@@ -246,11 +246,11 @@ show_jupyter_status() {
 
     jupyter_tokens=""
     for cont in $JUPYTER_CONTAINER; do
-      jupyter_token=$(docker exec $cont jupyter server list 2>/dev/null | sed -rn 's/(https?:\/\/).*token=([a-z0-9]+)\b.*/\2/p') 
+      jupyter_token=$(docker exec $cont jupyter server list 2>/dev/null | sed -rn 's/(https?:\/\/).*token=([a-z0-9]+)\b.*/\2/p')
       if [ -z "$jupyter_token" ]; then
-        jupyter_token="None";
+        jupyter_token="None"
       fi
-      jupyter_tokens="$jupyter_tokens $jupyter_token";
+      jupyter_tokens="$jupyter_tokens $jupyter_token"
     done
 
     # convert to arrays to be able to index lists
@@ -311,6 +311,14 @@ for p in DOCKER_COMPOSE_PATH HTPASSWD_PATH MLFLOW_DATA; do
   }
 done
 
+# CHECK INIT ###################################################################
+# Looks at known dependencies and errors if it finds at least one of them unmet.
+# The init method fixes issues that can be solved automatically. This is necessary
+# setup user workspace before first use.
+[ "$1" = init ] || check_init || {
+  exit $v
+}
+
 # Variable definitions ########################################################
 MLFLOW_LOCAL_PROJECT="$PWD"
 MLFLOW_ENV_FILE=$DOCKER_COMPOSE_PATH/run.env
@@ -340,14 +348,6 @@ GPUS=""
 RUN_VOLUMES=()
 RUN_ARGS="--rm"
 CONDA_DIR="/home/${USER}/.conda/envs/"
-
-# CHECK INIT ###################################################################
-# Looks at known dependencies and errors if it finds at least one of them unmet.
-# The init method fixes issues that can be solved automatically. This is necessary
-# setup user workspace before first use.
-[ "$1" = init ] || check_init || {
-  exit $v
-}
 
 # CLI Arguments ################################################################
 while getopts :he:g:n:c:v:i:t:r: flag; do
