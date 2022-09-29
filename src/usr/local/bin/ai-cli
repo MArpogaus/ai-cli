@@ -76,8 +76,7 @@ docker_run() {
 }
 
 basic_auth() {
-  echo "INFO:     basic_auth ${HTPASSWD_PATH} -- $1"
-  ls ${HTPASSWD_PATH}
+  echo "INFO: basic_auth ${HTPASSWD_PATH} -- $1"
   # Create htpasswd for Basic Auth
   if [[ ! -e ${HTPASSWD_PATH}/$1 ]]; then
     echo "Please enter a username and password to restrict access to: $1"
