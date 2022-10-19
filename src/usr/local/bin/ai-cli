@@ -567,6 +567,13 @@ case ${CMD} in
     echo "INFO: Running MLProject from $MLFLOW_GIT_PROJECT"
     docker_run workspace mlflow run $MLFLOW_GIT_PROJECT
     ;;
+  info) # show basic paths and env variables
+      echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
+      echo "INFO: DOCKER_USER=${DOCKER_USER}"
+      echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
+      echo "INFO: URLNAME=${URLNAME}"
+      echo "INFO: EXTENSION_PATH=${EXTENSION_PATH}"
+    ;;
   reset-password) # Reset Password for mlflow you will setup a new one at next server start
     rm "${HTPASSWD_PATH}/${MLFLOW_VIRTUAL_HOST}"
     echo "successfully reset password"
