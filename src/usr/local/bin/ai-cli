@@ -297,6 +297,8 @@ show_status() {
 # Read configuration file #####################################################
 CONFIG_PATH=/etc/ai-cli/config
 source $CONFIG_PATH
+USER_CONFIG=~/.config/ai-cli/config
+source $USER_CONFIG || echo "INFO: no user config found"
 
 # Check if paths correctly configured
 for p in DOCKER_COMPOSE_PATH HTPASSWD_PATH MLFLOW_DATA; do
@@ -529,6 +531,18 @@ case ${CMD} in
     echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
     echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
     docker_run jupyter $JUPYTER_LAB_CMD
+    ;;
+  runner) # start cml runner for repo
+      LAST_ARG="${@: -1}" # bash only
+      echo "INFO: Providing runner for '$LAST_ARG'"
+      docker run --gpus all \
+	    -e REPO_TOKEN=$PAT \
+            iterativeai/cml:0-dvc2-base1-gpu runner launch \
+            --repo="$LAST_ARG" \
+            --token="$PAT" \
+            --driver="gitlab" \
+            --labels="local,runner,ai-cli" \
+            --idle-timeout="1800"
     ;;
   exec) # execute @PROGRAMM inside container
     if [[ $# == 0 ]]; then
