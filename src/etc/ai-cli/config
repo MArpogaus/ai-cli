@@ -1,3 +1,10 @@
+DOCKER_COMPOSE_PATH=/usr/local/share/ai-cli/docker/
+HTPASSWD_PATH=/var/local/ai-cli/htpasswd
+HOME_PATH="${HOME}/.local/share/ai-cli/home"
+EXTENSION_PATH="${HOME}/.local/share/ai-cli/extensions"
+MLFLOW_DATA=/mnt/data/$USER/mlflow
 URLNAME=localhost
 MLFLOWPORT=5000
 JUPYTERPORT=8888
+PYTHON_VERSION=3.8
+MLFLOW_VERSION="1.28.0"

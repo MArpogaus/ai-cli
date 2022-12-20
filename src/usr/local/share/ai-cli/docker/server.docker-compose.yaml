@@ -18,10 +18,7 @@ version: '3'
 services:
 
   server:
-    build: 
-      context: /usr/local/share/ai-cli-docker/miniconda-mlflow 
-      args:
-        CUDA_VERSION: ${CUDA_VERSION}
+    image: ai-cli/mlflow-server
     user: $DOCKER_USER
     container_name: ${USER}-mlflow-server
     command:

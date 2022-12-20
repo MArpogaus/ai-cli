@@ -1,6 +1,7 @@
 # AI-CLI
+![TESTCI BADGE](https://github.com/MArpogaus/ai-cli/actions/workflows/test-ci.yml/badge.svg)
 ## About
-`AI-CLI` is a script, developed to simplify the execution of [MLflow Projects](https://www.mlflow.org/docs/latest/projects.html).  Whether you intend to run from a local folder structure or want to execute a remote project from a GitLab repository, both ways are supported in `ai-cli`. 
+`AI-CLI` is a command line script, developed to simplify the execution of [MLflow Projects](https://www.mlflow.org/docs/latest/projects.html).  Whether you intend to run from a local folder structure or want to execute a remote project from a GitLab repository, both ways are supported in `ai-cli`. 
 MLflow uses docker container to manage the dependencies of different projects. 'ai-cli' manages them for you automatically and provides additional functionality for convenience to speedup your workflow.
 
  - Run MLflow projects with one command
@@ -37,41 +38,85 @@ For a clean install
 need to be cleared manually.
 ## Usage
 
-    ai-cli [OPTIONS] COMMAND [ARGS]
+    ai-cli [OPTIONS] COMMAND [ARGS...]
 
 ### Options
 
-    -h  Show help
-    -c  Specify cuda version
-    -v  Mount additional folder as volume
-    -e  Specify environment file
-    -n  Specify experiment name (default $MLFLOW_EXPERIMENT_NAME)
-    -g  Specify visible GPUs (default $GPUS)
+    -v VOLUME            Specify additional docker VOLUMEs
+    -e FILE              Specify environment FILE
+    -g GPUS              Enable gpu support. Set specific GPUS, e.g. 0,1 for gpu 0 and 1.
+    -r RUNTIME           Specify specific RUNTIME. Default is read from docker info.
+    -n NAME              Specify experiment NAME
+    -c CUDA              Build with cuda support. Specify CUDA version to use. Tags image with 'c<VERSION>' by default.
+    -i IMAGE             Specify docker IMAGE to be used.
+    -t TAG               Specify image TAG to be used.
+    -h                   Show help
 
 ### Commands
 
-    init              initialize user workspace
-    start-server      start mlflow server
-    stop-server       stop mlflow server
-    restart-server    restart mlflow server
-    upgrade           pull and rebuild the docker containers
-    bash              start bash shell inside ai-cli container
-    notebook          start jupyter notebook inside ai-cli container
-    lab               start jupyter lab inside ai-cli container
-    status            show overview over docker images
-    exec PROGRAM      execute PROGRAMM inside ai-cli container
-    run PATH          run MLProject from PATH inside ai-cli container
-    run-from-git URI  run MLProject from git repo at URI inside ai-cli container
+    init                 initialize this script for your user
+    start-server         start mlflow server
+    stop-server          stop mlflow server
+    restart-server       restart mlflow server
+    status               show status of your environment
+    build                build image from dockerfile
+    bash                 start bash shell inside container
+    notebook             start jupyter notebook server
+    lab                  start jupyter lab server
+    exec PROGRAMM        execute PROGRAMM inside container
+    run PATH             run MLProject from PATH inside container
+    run-from-git URI     run MLProject from git repo at URI inside container
+    reset-password       Reset Password for mlflow you will setup a new one at next server start
 
-### Example
+### Workflow
 
-    Assume a mlflow project at current working directory:
+After a fresh install, each user needs to execute `ai-cli init` before starting to work.
+To use the mlflow dashboard, the mlflow server needs to be started using `ai-cli start-server`.
 
-    "ai-cli -n MyCoolProject bash"
-    "ai-cli run ."
-    "ai-cli -e .env run" (with .env as defautl environment file)
-    "ai-cli -e the_envir run-from-git" (with MLFLOW_GIT_PROJECT defined)
-    "ai-cli run-from-git "https://<token>:<password>@<uri>#<path/to/MLProject (optional)> -v <branch or commit hash>"
+Ai-cli is based on docker images/containers. The list of images associated to a user can be seen with `ai-cli status`.
+The image ai-cli/<USER>:default is used by default. 
+A different associated image can selected by specifying the -t flag.
+
+At the start, no image exists. A basic image get created using `ai-cli build`.
+Now ai-cli is ready to be used, examples are provided below.
+
+#### Example commands
+Assume a mlflow project at current working directory:
+
+| comand | comment |
+|---|---|
+|  `ai-cli lab` | opens jupyter lab at https://[USER]-lab.[HOST]. Use token from command output to login.| 
+|  `ai-cli run .` | runs local mlflow project |
+|  `ai-cli bash` | open bash for local project in docker image. |
+|--- legacy ---|--- ---|
+| `ai-cli -e .env run .` | with .env as defautl environment file |
+| `ai-cli -e the_envir run-from-git`  | with MLFLOW_GIT_PROJECT defined |
+| `ai-cli run-from-git "https://<token>:<password>@<uri>#<path/to/MLProject (optional)> -v <branch or commit hash>` | |
+
+#### Cuda Support
+
+Ai-cli is built to support tensorflow with cuda.
+To use cuda, a cuda-enabled image is necessary. 
+To create a cuda image, use the build command and specify the desired cuda version using the `-c` switch.
+The associated image then gets tagged as the version, prepended with a "c".
+To use cuda by default, simply tag the cuda image with the default tag:
+
+`ai-cli -c 11.2 -t default build`.
+
+Now the cuda image with version "11.2" is selected by default without the need to specify the tag everytime.
+
+For the cuda image to work, add the `-g` option when using any command. 
+This makes the gpu available and switches the runtime to "nvidia".
+Note that, the docker-nvidia-runtime needs to be set up correctly beforehand.
+
+For example `ai-cli -g 0 bash` opens a bash command line inside the container, exposing gpu "0".
+It can be verified that the gpu is used, using `nvidia-smi` inside the container.
+
+## Troubleshooting
+
+| issue | help |
+|---|---|
+| `run` fails with error "too many 500 error responses" | Provide experiment name with `-n` flag. If name already used, try with new name. Names deleted on the mlflow-dashboard still count as used. |
 
 ## License
     AI-CLI Simplifying AI Experiments

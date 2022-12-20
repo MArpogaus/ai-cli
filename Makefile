@@ -25,3 +25,6 @@ install: ## install ai-cli
 
 uninstall: ## uninstall ai-cli
 	dpkg -r ai-cli
+
+check: ## run tests for ai-cli
+	./CI/run-tests.sh

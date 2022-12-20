@@ -14,9 +14,15 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-set -e
+ARG PYTHON_VERSION
+FROM python:$PYTHON_VERSION-slim
+ENV DEBIAN_FRONTEND=noninteractive \
+    CONDA_DIR=/opt/conda \
+    SHELL=/bin/bash \
+    PATH="${CONDA_DIR}/bin:${PATH}"
 
-[[ -n $GIT_USER_NAME ]] && git config --global user.name $GIT_USER_NAME
-[[ -n $GIT_USER_EMAIL ]] && git config --global user.email $GIT_USER_EMAIL
+ARG MLFLOW_VERSION
+RUN pip install mlflow==$MLFLOW_VERSION.*
 
-exec "$@"
+WORKDIR /app
+

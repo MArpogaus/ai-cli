@@ -13,58 +13,52 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-version: '3'
+version: '2'
 
 services:
 
   workspace:
-    build:
-      context: /usr/local/share/ai-cli-docker/miniconda-mlflow
-      args:
-        CUDA_VERSION: ${CUDA_VERSION}
-    user: $DOCKER_USER
+    image: $IMAGE_NAME
+    user: ${DOCKER_USER}
+    group_add:
+     - ${ADDITIONAL_GROUP:-users}
     container_name: ${USER}-mlflow-run
-    runtime: nvidia
-    volumes:
+    runtime: ${RUNTIME}
+    volumes: &mounted_volumes
       - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
       - ${MLFLOW_DATA}:/mlruns
-      - /home/${USER}/.local/share/ai-cli/home:/home/${USER}/
+      - ${HOME_PATH}:/home/${USER}
+      - ${EXTENSION_PATH}:/opt/conda/share/jupyter/lab/extensions
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
     environment:
      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
-     GIT_USER_NAME: $GIT_USER_NAME
-     GIT_USER_EMAIL: $GIT_USER_EMAIL
+     CONDA_ENVS_PATH: ${CONDA_DIR}
+     NVIDIA_VISIBLE_DEVICES: "${GPUS}"
+    working_dir: /app
     env_file:
-      - ${MLFLOW_ENV_FILE:-/usr/local/share/ai-cli-docker/run.env}
+      - ${MLFLOW_ENV_FILE}
     networks:
       - mlflow_bridge
 
   jupyter:
-    build:
-      context: /usr/local/share/ai-cli-docker/miniconda-mlflow
-      args:
-        CUDA_VERSION: ${CUDA_VERSION}   
-    user: $DOCKER_USER
+    image: $IMAGE_NAME
+    user: ${DOCKER_USER}
+    group_add:
+     - ${ADDITIONAL_GROUP:-users}
     container_name: ${USER}-jupyter
-    runtime: nvidia
-    volumes:
-      - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
-      - ${MLFLOW_DATA}:/mlruns
-      - /home/${USER}/.local/share/ai-cli/home:/home/${USER}/
-      - /etc/passwd:/etc/passwd:ro
-      - /etc/group:/etc/group:ro
+    runtime: ${RUNTIME}
+    working_dir: /home/${USER}
+    volumes: *mounted_volumes
     environment:
+      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
+      CONDA_ENVS_PATH: ${CONDA_DIR}
+      NVIDIA_VISIBLE_DEVICES: "${GPUS}"
       VIRTUAL_HOST: ${JUPYTER_VIRTUAL_HOST}
       VIRTUAL_PORT: ${JUPYTERPORT}
       SSL_POLICY: Mozilla-Modern
       HSTS: 'max-age=31536000; includeSubDomains; preload'
       CERT_NAME: shared
-      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
-      GIT_USER_NAME: $GIT_USER_NAME
-      GIT_USER_EMAIL: $GIT_USER_EMAIL
-    env_file:
-      - ${MLFLOW_ENV_FILE:-/usr/local/share/ai-cli-docker/run.env}
     networks:
       - mlflow_bridge
       - proxy_net
