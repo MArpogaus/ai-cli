@@ -20,6 +20,8 @@ services:
   workspace:
     image: $IMAGE_NAME
     user: ${DOCKER_USER}
+    group_add:
+     - ${ADDITIONAL_GROUP:-users}
     container_name: ${USER}-mlflow-run
     runtime: ${RUNTIME}
     volumes: &mounted_volumes
@@ -29,7 +31,6 @@ services:
       - ${EXTENSION_PATH}:/opt/conda/share/jupyter/lab/extensions
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
-      - /dev:/dev
     environment:
      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
      CONDA_ENVS_PATH: ${CONDA_DIR}
@@ -43,6 +44,8 @@ services:
   jupyter:
     image: $IMAGE_NAME
     user: ${DOCKER_USER}
+    group_add:
+     - ${ADDITIONAL_GROUP:-users}
     container_name: ${USER}-jupyter
     runtime: ${RUNTIME}
     working_dir: /home/${USER}

@@ -15,12 +15,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 FROM jupyter/minimal-notebook:ubuntu-20.04
 
-# switch to root to fix permissions for local user
-USER root
-
 ARG ARG_NB_USER \
     ARG_NB_UID \
     ARG_NB_GID \
+    PYTHON_VERSION \
     MLFLOW_VERSION \
     ARG_HOME
 
@@ -31,12 +29,17 @@ ENV NB_USER=${ARG_NB_USER} \
     MLFLOW_CONDA_CREATE_ENV_CMD=mamba
 
 RUN set -x && \
+    rm ${CONDA_DIR}/conda-meta/pinned && \
     mamba install --quiet --yes \
-    mlflow=${MLFLOW_VERSION} \
+    python==${PYTHON_VERSION}.* \
+    mlflow==${MLFLOW_VERSION}.* \
     'nb_conda_kernels' && \
+    mamba list python | grep '^python ' | tr -s ' ' | cut -d ' ' -f 1,2 >> "${CONDA_DIR}/conda-meta/pinned" && \
     mamba clean --all -f -y
 
-RUN fix-permissions "${CONDA_DIR}"
+# switch to root to fix permissions for local user and add entrypoint.sh
+USER root
+RUN chown -R $NB_UID:$NB_GID "${CONDA_DIR}"
 
 COPY entrypoint.sh /entrypoint.sh 
 RUN chmod +x /entrypoint.sh

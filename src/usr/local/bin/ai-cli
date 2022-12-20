@@ -427,6 +427,7 @@ fi
 
 # Exports #####################################################################
 # Export env for docker-compose
+export ADDITIONAL_GROUP
 export CONDA_DIR
 export DOCKER_USER
 export EXTENSION_PATH
@@ -439,17 +440,10 @@ export JUPYTERPORT
 export MLFLOWPORT
 export MLFLOW_DATA
 export MLFLOW_ENV_FILE
-export MLFLOW_VERSION
 export NB_GID
 export NB_UID
 export RUNTIME
 export URLNAME
-
-#echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
-#echo "INFO: DOCKER_USER=${DOCKER_USER}"
-#echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
-#echo "INFO: URLNAME=${URLNAME}"
-#echo "INFO: MLFLOWPORT=${MLFLOWPORT}"
 
 # show docker info ####################################################################
 echo "INFO: Using image ${IMAGE_NAME}"
@@ -477,7 +471,11 @@ case ${CMD} in
     dc server up -d
     ;;
   build-server) # build mlflow server
-    dc server build --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION
+  docker build \
+      -t ai-cli/mlflow-server \
+      --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
+      --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
+      $DOCKER_COMPOSE_PATH/mlflow
     ;;
   status) # show status of your environment
     show_status ;;
@@ -488,11 +486,12 @@ case ${CMD} in
     echo "INFO: Building workspace-base"
     docker build \
       -t ${IMAGE_NAME} \
-      -t ai-cli/workspace-base \
+      -t ${IMAGE_PREFIX}:base \
       --build-arg=ARG_NB_USER="$USER" \
       --build-arg=ARG_NB_UID="$NB_UID" \
       --build-arg=ARG_NB_GID="$NB_GID" \
       --build-arg=ARG_HOME="/home/${USER}" \
+      --build-arg=PYTHON_VERSION="$PYTHON_VERSION" \
       --build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
       $DOCKER_COMPOSE_PATH/workspace-base/
 
@@ -505,7 +504,7 @@ case ${CMD} in
       echo "INFO: NVIDIA DRIVER ${DRIVER_VERSION}"
       docker build \
         -t ${IMAGE_NAME} \
-        -t ai-cli/workspace-cuda:"$IMAGE_TAG" \
+        --build-arg=BASE_IMAGE="${IMAGE_PREFIX}:base" \
         --build-arg=CMAJ="$CMAJ" \
         --build-arg=CMIN="$CMIN" \
         $DOCKER_COMPOSE_PATH/workspace-cuda/

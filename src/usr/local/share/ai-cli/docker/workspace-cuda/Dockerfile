@@ -1,4 +1,5 @@
-FROM ai-cli/workspace-base
+ARG BASE_IMAGE
+FROM $BASE_IMAGE
 USER root
 
 ARG CMAJ \
