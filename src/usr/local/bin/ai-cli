@@ -299,6 +299,7 @@ CONFIG_PATH=/etc/ai-cli/config
 source $CONFIG_PATH
 USER_CONFIG=~/.config/ai-cli/config
 source $USER_CONFIG || echo "INFO: no user config found"
+VERSION=$(cat /etc/ai-cli/version)
 
 # Check if paths correctly configured
 for p in DOCKER_COMPOSE_PATH HTPASSWD_PATH MLFLOW_DATA; do
@@ -586,6 +587,10 @@ case ${CMD} in
       echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
       echo "INFO: URLNAME=${URLNAME}"
       echo "INFO: EXTENSION_PATH=${EXTENSION_PATH}"
+      echo "INFO: VERSION=${VERSION}"
+    ;;
+  version) # show git commit hash this script is installed with
+      echo "$VERSION"
     ;;
   reset-password) # Reset Password for mlflow you will setup a new one at next server start
     rm "${HTPASSWD_PATH}/${MLFLOW_VIRTUAL_HOST}"
