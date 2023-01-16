@@ -534,11 +534,13 @@ case ${CMD} in
     docker_run jupyter $JUPYTER_LAB_CMD
     ;;
   runner) # start cml runner for repo
+      set -x
       LAST_ARG="${@: -1}" # bash only
       echo "INFO: Providing runner for '$LAST_ARG'"
       docker run --gpus all \
 	    -e REPO_TOKEN=$PAT \
-            iterativeai/cml:0-dvc2-base1-gpu runner launch \
+      --mount type=bind,source="$DVC_DATA",target=/data \
+            "iterativeai/cml:0-dvc2-base1-gpu" runner launch \
             --repo="$LAST_ARG" \
             --token="$PAT" \
             --driver="gitlab" \
