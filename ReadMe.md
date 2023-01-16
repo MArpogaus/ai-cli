@@ -112,6 +112,29 @@ Note that, the docker-nvidia-runtime needs to be set up correctly beforehand.
 For example `ai-cli -g 0 bash` opens a bash command line inside the container, exposing gpu "0".
 It can be verified that the gpu is used, using `nvidia-smi` inside the container.
 
+#### CML Runner
+
+Ai-cli supports starting a CML runner locally for your CI/CD Workflow.
+
+Here is how to use `ai-cli runner GIT-ORIGIN-HTTPS`.
+
+1. Create access token (Profile->Preferences->Access Tokens in gitlab). Save your token at `~/.config/ai-cli/config` into a bash variable called `PAT`. E.g. `PAT=glpat-asdfghjkl `.
+2. Enable CI for your repository. (Settings->General->Visibility, project features, permissions->Repository->CI/CD->Save Changes in gitlab)
+3. Configure pipeline (.gitlab-ci.yml, in gitlab). For the local runner to pickup a job, the job needs to have the tag `ai-cli`.
+   For Example:
+   ```yml
+   test:
+    tags:
+     - ai-cli
+    script:
+     - echo "Hello World" >> report.md
+     - cml comment create report.md
+   ```
+4. Copy the https clone link for your repository. Start your local runner using this link.
+
+Now the runner is ready to pick up your jobs.
+
+
 ## Troubleshooting
 
 | issue | help |
