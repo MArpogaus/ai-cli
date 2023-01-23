@@ -536,8 +536,8 @@ case ${CMD} in
   runner) # start cml runner for repo
       set -x
       TOKEN_ARG="${@: -1}" # bash only
-      URL_ARG="${@: -2}" # second last
-      echo "INFO: Providing runner for '$URL_ARG'"
+      URL_ARG="${@:-2:1}" # second last
+      echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'"
       docker run --gpus all \
 	    -e REPO_TOKEN=$TOKEN_ARG \
 	    --network="${USER}_mlflow_bridge" \
