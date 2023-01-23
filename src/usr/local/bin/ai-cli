@@ -535,14 +535,16 @@ case ${CMD} in
     ;;
   runner) # start cml runner for repo
       set -x
-      LAST_ARG="${@: -1}" # bash only
-      echo "INFO: Providing runner for '$LAST_ARG'"
+      TOKEN_ARG="${@: -1}" # bash only
+      URL_ARG="${@: -2}" # second last
+      echo "INFO: Providing runner for '$URL_ARG'"
       docker run --gpus all \
-	    -e REPO_TOKEN=$PAT \
+	    -e REPO_TOKEN=$TOKEN_ARG \
+	    --network="${USER}_mlflow_bridge" \
       --mount type=bind,source="$DVC_DATA",target=/data \
             "iterativeai/cml:0-dvc2-base1-gpu" runner launch \
-            --repo="$LAST_ARG" \
-            --token="$PAT" \
+            --repo="$URL_ARG" \
+            --token="$TOKEN_ARG" \
             --driver="gitlab" \
             --labels="local,runner,ai-cli" \
             --idle-timeout="1800"
