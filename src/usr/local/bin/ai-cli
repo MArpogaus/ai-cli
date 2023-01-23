@@ -535,8 +535,9 @@ case ${CMD} in
     ;;
   runner) # start cml runner for repo
       set -x
-      TOKEN_ARG="${@: -1}" # bash only
-      URL_ARG="${@:-2:1}" # second last
+      args=( "$@" )
+      TOKEN_ARG="${args[-1]}"
+      URL_ARG="${args[-2]}"
       echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'"
       docker run --gpus all \
 	    -e REPO_TOKEN=$TOKEN_ARG \
@@ -547,7 +548,6 @@ case ${CMD} in
             --token="$TOKEN_ARG" \
             --driver="gitlab" \
             --labels="local,runner,ai-cli" \
-            --idle-timeout="1800"
     ;;
   exec) # execute @PROGRAMM inside container
     if [[ $# == 0 ]]; then
