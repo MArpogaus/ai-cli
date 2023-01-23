@@ -297,8 +297,6 @@ show_status() {
 # Read configuration file #####################################################
 CONFIG_PATH=/etc/ai-cli/config
 source $CONFIG_PATH
-USER_CONFIG=~/.config/ai-cli/config
-source $USER_CONFIG || echo "INFO: no user config found"
 VERSION=$(cat /etc/ai-cli/version)
 
 # Check if paths correctly configured
