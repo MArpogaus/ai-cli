@@ -116,9 +116,9 @@ It can be verified that the gpu is used, using `nvidia-smi` inside the container
 
 Ai-cli supports starting a CML runner locally for your CI/CD Workflow.
 
-Here is how to use `ai-cli runner GIT-ORIGIN-HTTPS`.
+Here is how to use `ai-cli runner GIT-ORIGIN-HTTPS ACCESS-TOKEN`.
 
-1. Create access token (Profile->Preferences->Access Tokens in gitlab). Save your token at `~/.config/ai-cli/config` into a bash variable called `PAT`. E.g. `PAT=glpat-asdfghjkl `.
+1. Create access token for your project (as owner) or personal access token.
 2. Enable CI for your repository. (Settings->General->Visibility, project features, permissions->Repository->CI/CD->Save Changes in gitlab)
 3. Configure pipeline (.gitlab-ci.yml, in gitlab). For the local runner to pickup a job, the job needs to have the tag `ai-cli`.
    For Example:
