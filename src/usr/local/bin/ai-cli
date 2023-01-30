@@ -536,12 +536,16 @@ case ${CMD} in
       args=( "$@" )
       TOKEN_ARG="${args[-1]}"
       URL_ARG="${args[-2]}"
-      echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'"
-      docker run --gpus all \
+      echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'. GPUS: ${GPUS}"
+      GPUOPT=""
+      if [[ -n "$GPUS" ]]; then
+	GPUOPT="--gpus ${GPUS}"
+      fi
+      docker run $GPUOPT \
 	    -e REPO_TOKEN=$TOKEN_ARG \
 	    --network="${USER}_mlflow_bridge" \
-      --mount type=bind,source="$DVC_DATA",target=/data \
-            "iterativeai/cml:0-dvc2-base1-gpu" runner launch \
+      	    --mount type=bind,source="$DVC_DATA",target=/data \
+            "iterativeai/cml:latest-gpu" runner launch \
             --repo="$URL_ARG" \
             --token="$TOKEN_ARG" \
             --driver="gitlab" \
