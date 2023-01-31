@@ -550,6 +550,7 @@ case ${CMD} in
             --token="$TOKEN_ARG" \
             --driver="gitlab" \
             --labels="local,runner,ai-cli" \
+	    --idle-timeout -1
     ;;
   exec) # execute @PROGRAMM inside container
     if [[ $# == 0 ]]; then
