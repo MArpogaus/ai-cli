@@ -67,6 +67,7 @@ dc() {
     $*
 }
 
+# docker_run PARAM runs PARAM as command with workspace.docker-compose.yaml
 docker_run() {
   SERVICE_NAME=$1
   shift
@@ -532,7 +533,6 @@ case ${CMD} in
     docker_run jupyter $JUPYTER_LAB_CMD
     ;;
   runner) # start cml runner for repo
-      set -x
       args=( "$@" )
       TOKEN_ARG="${args[-1]}"
       URL_ARG="${args[-2]}"
@@ -541,16 +541,21 @@ case ${CMD} in
       if [[ -n "$GPUS" ]]; then
 	GPUOPT="--gpus ${GPUS}"
       fi
-      docker run $GPUOPT \
-	    -e REPO_TOKEN=$TOKEN_ARG \
-	    --network="${USER}_mlflow_bridge" \
-      	    --mount type=bind,source="$DVC_DATA",target=/data \
-            "iterativeai/cml:latest-gpu" runner launch \
-            --repo="$URL_ARG" \
-            --token="$TOKEN_ARG" \
-            --driver="gitlab" \
-            --labels="local,runner,ai-cli" \
-	    --idle-timeout -1
+
+      docker run \
+      -e REPO_TOKEN="$TOKEN_ARG" \
+      -it \
+      --rm \
+      --user jovyan \
+      --network="${USER}_mlflow_bridge" \
+      --mount type=bind,source="$DVC_DATA",target=/data \
+      test cml runner launch \
+      --repo="$URL_ARG" \
+      --token="$TOKEN_ARG" \
+      --driver="gitlab" \
+      --labels="local,runner,ai-cli" \
+      --idle-timeout -1
+      
     ;;
   exec) # execute @PROGRAMM inside container
     if [[ $# == 0 ]]; then
