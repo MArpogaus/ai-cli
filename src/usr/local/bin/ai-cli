@@ -511,6 +511,12 @@ case ${CMD} in
         --build-arg=CMIN="$CMIN" \
         $DOCKER_COMPOSE_PATH/workspace-cuda/
     fi
+    if [[ "${IMAGE_TAG}" ==  "runner" ]]; then
+      docker build \
+      -t "$IMAGE_NAME" \
+      --build-arg=BASE_IMAGE="ai-cli/${USER}:default" \
+      "$DOCKER_COMPOSE_PATH"/workspace-dvc/
+    fi
     ;;
   bash) # start bash shell inside container
     export MLFLOW_LOCAL_PROJECT
@@ -534,6 +540,10 @@ case ${CMD} in
     ;;
   runner) # start cml runner for repo
       args=( "$@" )
+      if [[ ${#args[@]} -ne 2 ]]; then
+        echo "please provide URL and TOKEN"
+        exit 1
+      fi
       TOKEN_ARG="${args[-1]}"
       URL_ARG="${args[-2]}"
       echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'. GPUS: ${GPUS}"
@@ -549,7 +559,7 @@ case ${CMD} in
       --user jovyan \
       --network="${USER}_mlflow_bridge" \
       --mount type=bind,source="$DVC_DATA",target=/data \
-      test cml runner launch \
+      "ai-cli/${USER}:runner" cml runner launch \
       --repo="$URL_ARG" \
       --token="$TOKEN_ARG" \
       --driver="gitlab" \
