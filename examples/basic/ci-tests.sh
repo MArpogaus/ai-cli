@@ -3,4 +3,4 @@ ai-cli start-server
 #ai-cli -n basic run .
 
 sleep 1m
-wget http://app:5000 && cat index.html
+wget http://server:5000 && cat index.html
