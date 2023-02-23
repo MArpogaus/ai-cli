@@ -13,9 +13,9 @@ echo "CI: exec init"
 bash -x ai-cli init
 echo "CI: exec init finished successfully"
 
-#echo "CI: start mlflow"
-#bash -ex ai-cli start-server
-#echo "CI: start mlflow finished successfully"
+echo "CI: start mlflow"
+bash -ex ai-cli start-server
+echo "CI: start mlflow finished successfully"
 
 #echo "CI: exec run"
 #echo "working directory is \"$PWD\""
