@@ -1,6 +1,6 @@
 #!/bin/bash
-ai-cli init
-ai-cli build all
+#ai-cli init
+ai-cli -c 11.2 build all
 ai-cli start mlflow
 #ai-cli -n basic run .
 
