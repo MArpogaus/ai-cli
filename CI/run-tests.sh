@@ -17,6 +17,7 @@ echo "CI: start mlflow"
 bash -ex ai-cli start-mlflow
 echo "CI: start mlflow finished successfully"
 
+docker logs runner-mlflow-server
 wget http://server:5000
 cat index.html
 
