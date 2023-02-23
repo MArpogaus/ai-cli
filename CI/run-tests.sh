@@ -18,6 +18,8 @@ bash -ex ai-cli start-mlflow
 echo "CI: start mlflow finished successfully"
 
 docker container ls -a
+sleep 1m
+docker ps -a
 wget http://server:5000
 cat index.html
 
