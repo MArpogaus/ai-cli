@@ -104,7 +104,8 @@ init() {
   mkdir -p $EXTENSION_PATH
   chmod 777 $EXTENSION_PATH
   echo "INFO: init docker workspace"
-  ai-cli build all &>/dev/null
+  ai-cli build base
+  ai-cli build mlflow
   docker_run workspace mamba init &>/dev/null
   echo "INFO: Initialization complete"
 }

@@ -85,8 +85,8 @@ RUN add-apt-repository universe --yes \
 # CONFIGURE RUNNER PATH
 ENV CML_RUNNER_PATH=/home/runner
 ENV MLRUNS_PATH=/mlruns
-RUN mkdir ${CML_RUNNER_PATH} && chown jovyan "$CML_RUNNER_PATH" && chmod 777 "${CML_RUNNER_PATH}"
-RUN mkdir "$MLRUNS_PATH" && chown jovyan "$MLRUNS_PATH" && chmod 777 "$MLRUNS_PATH"
+RUN mkdir -p ${CML_RUNNER_PATH} && chown jovyan "$CML_RUNNER_PATH" && chmod 777 "${CML_RUNNER_PATH}"
+RUN mkdir -p "$MLRUNS_PATH" && chown jovyan "$MLRUNS_PATH" && chmod 777 "$MLRUNS_PATH"
 #RUN chown jovyan "/home/$USER"
 ENV HOME="$CML_RUNNER_PATH"
 WORKDIR ${CML_RUNNER_PATH}
