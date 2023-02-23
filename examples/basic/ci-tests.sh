@@ -1,5 +1,7 @@
 #!/bin/bash
-ai-cli start-server
+ai-cli init
+ai-cli build all
+ai-cli start mlflow
 #ai-cli -n basic run .
 
 sleep 1m
