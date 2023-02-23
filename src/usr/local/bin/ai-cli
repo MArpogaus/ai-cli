@@ -104,10 +104,8 @@ init() {
   mkdir -p $EXTENSION_PATH
   chmod 777 $EXTENSION_PATH
   echo "INFO: init docker workspace"
-  ai-cli build &>/dev/null
+  ai-cli build all &>/dev/null
   docker_run workspace mamba init &>/dev/null
-  echo "INFO: init mlflow server"
-  ai-cli build-server &>/dev/null
   echo "INFO: Initialization complete"
 }
 check_init() {
@@ -461,48 +459,47 @@ fi
 case ${CMD} in
   init) # initialize this script for your user
     init ;;
-  start-server) # start mlflow server
+  start-mlflow) # start mlflow server
     basic_auth "$MLFLOW_VIRTUAL_HOST"
     dc server up -d
     ;;
-  stop-server) # stop mlflow server
+  stop-mlflow) # stop mlflow server
     dc server down ;;
-  restart-server) # restart mlflow server
+  restart-mlflow) # restart mlflow server
     dc server down
     ai-cli build-server
     dc server up -d
     ;;
-  build-server) # build mlflow server
-  docker build \
-      -t ai-cli/mlflow-server \
-      --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
-      --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
-      $DOCKER_COMPOSE_PATH/mlflow
-    ;;
   status) # show status of your environment
     show_status ;;
   build) # build image from dockerfile
+    TARGET="${@: -1}"
+    if [[ "$TARGET" != "all" && "$TARGET" != "base" && "$TARGET" != "cuda" && "$TARGET" != "runner" && "$TARGET" != "mlflow" ]]; then
+      echo "Please provide TARGET."
+      echo "VALUES: all|base|cuda|runner|mlflow"
+      exit 1
+    fi
 
-    # workspace-cuda depends on workspace-base image existing so is always built
-    echo "INFO: Specified Cuda Version: '${CUDA_VERSION}'"
-    echo "INFO: Building workspace-base"
-    docker build \
-      -t ${IMAGE_NAME} \
-      -t ${IMAGE_PREFIX}:base \
-      --build-arg=ARG_NB_USER="$USER" \
-      --build-arg=ARG_NB_UID="$NB_UID" \
-      --build-arg=ARG_NB_GID="$NB_GID" \
-      --build-arg=ARG_HOME="/home/${USER}" \
-      --build-arg=PYTHON_VERSION="$PYTHON_VERSION" \
-      --build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
-      $DOCKER_COMPOSE_PATH/workspace-base/
+    if [[ "$TARGET" == "base" || "$TARGET" == "all" ]]; then
+      echo "INFO: Building workspace-base"
+      docker build \
+        -t ${IMAGE_NAME} \
+        -t ${IMAGE_PREFIX}:base \
+        --build-arg=ARG_NB_USER="$USER" \
+        --build-arg=ARG_NB_UID="$NB_UID" \
+        --build-arg=ARG_NB_GID="$NB_GID" \
+        --build-arg=ARG_HOME="/home/${USER}" \
+        --build-arg=PYTHON_VERSION="$PYTHON_VERSION" \
+        --build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
+        $DOCKER_COMPOSE_PATH/workspace-base/
+    fi
 
-    if [ ${CUDA_VERSION} ]; then
+    if [[ "$TARGET" == "cuda" || "$TARGET" == "all" ]]; then
       echo "INFO: Building workspace-cuda"
       # version formats vary so we need to split into major and minor version
       CMAJ=${CUDA_VERSION%\.*}
       CMIN=${CUDA_VERSION#*\.}
-      echo "INFO: CMAJ ${CMAJ}, CMIN ${CMIN}"
+      echo "INFO: $CUDA_VERSION: CMAJ ${CMAJ}, CMIN ${CMIN}"
       echo "INFO: NVIDIA DRIVER ${DRIVER_VERSION}"
       docker build \
         -t ${IMAGE_NAME} \
@@ -511,11 +508,18 @@ case ${CMD} in
         --build-arg=CMIN="$CMIN" \
         $DOCKER_COMPOSE_PATH/workspace-cuda/
     fi
-    if [[ "${IMAGE_TAG}" ==  "runner" ]]; then
+    if [[ "$TARGET" ==  "runner" || "$TARGET" == "all" ]]; then
       docker build \
       -t "$IMAGE_NAME" \
       --build-arg=BASE_IMAGE="ai-cli/${USER}:default" \
       "$DOCKER_COMPOSE_PATH"/workspace-dvc/
+    fi
+    if [[ "$TARGET" == "mlflow" || "$TARGET" == "all" ]]; then
+      docker build \
+        -t ai-cli/mlflow-server \
+        --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
+        --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
+        $DOCKER_COMPOSE_PATH/mlflow
     fi
     ;;
   bash) # start bash shell inside container
