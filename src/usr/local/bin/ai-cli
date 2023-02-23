@@ -106,7 +106,7 @@ init() {
   echo "INFO: init docker workspace"
   ai-cli build base
   ai-cli build mlflow
-  #docker_run workspace mamba init &>/dev/null
+  docker_run workspace mamba init &>/dev/null
   echo "INFO: Initialization complete"
 }
 check_init() {
