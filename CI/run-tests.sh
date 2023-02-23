@@ -17,6 +17,9 @@ echo "CI: start mlflow"
 bash -ex ai-cli start-mlflow
 echo "CI: start mlflow finished successfully"
 
+wget http://server:5000
+cat index.html
+
 #echo "CI: exec run"
 #echo "working directory is \"$PWD\""
 #ls -al
