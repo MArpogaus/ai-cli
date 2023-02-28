@@ -477,13 +477,13 @@ case ${CMD} in
     show_status ;;
   build) # build image from dockerfile
     TARGET="${@: -1}"
-    if [[ "$TARGET" != "all" && "$TARGET" != "base" && "$TARGET" != "cuda" && "$TARGET" != "runner" && "$TARGET" != "mlflow" ]]; then
-      echo "Please provide TARGET."
-      echo "VALUES: all|base|cuda|runner|mlflow"
+    if [[ "$TARGET" != "all" && "$TARGET" != "workspace" && "$TARGET" != "workspace-cuda" && "$TARGET" != "runner" && "$TARGET" != "runner-cuda" && "$TARGET" != "mlflow" ]]; then
+      echo "ERROR: Please provide TARGET."
+      echo "ERROR: Values: all|workspace|workspace-cuda|runner|runner-cuda|mlflow"
       exit 1
     fi
 
-    if [[ "$TARGET" == "base" || "$TARGET" == "all" ]]; then
+    if [[ "$TARGET" == "workspace" || "$TARGET" == "all" ]]; then
       echo "INFO: Building workspace-base"
       docker build \
         -t ${IMAGE_NAME} \
@@ -497,7 +497,7 @@ case ${CMD} in
         $DOCKER_COMPOSE_PATH/workspace-base/
     fi
 
-    if [[ "$TARGET" == "cuda" || "$TARGET" == "all" ]]; then
+    if [[ "$TARGET" == "workspace-cuda" || "$TARGET" == "runner-cuda" || "$TARGET" == "all" ]]; then
       echo "INFO: Building workspace-cuda"
       # version formats vary so we need to split into major and minor version
       CMAJ=${CUDA_VERSION%\.*}
@@ -516,6 +516,11 @@ case ${CMD} in
       -t "$IMAGE_NAME" \
       --build-arg=BASE_IMAGE="ai-cli/${USER}:default" \
       "$DOCKER_COMPOSE_PATH"/workspace-dvc/
+    fi
+    if [[ "$TARGET" ==  "runner-cuda" || "$TARGET" == "all" ]]; then
+          docker build \
+           --build-arg=BASE_IMAGE="$IMAGE_NAME" \
+           "$DOCKER_COMPOSE_PATH"/workspace-dvc/
     fi
     if [[ "$TARGET" == "mlflow" || "$TARGET" == "all" ]]; then
       docker build \
