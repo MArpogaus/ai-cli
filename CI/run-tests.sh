@@ -19,11 +19,12 @@ echo "CI: start mlflow finished successfully"
 
 docker container ls -a
 docker logs runner-mlflow-server
-sleep 1m
 docker ps -a
+docker network ls
 docker logs runner-mlflow-server
 wget http://0.0.0.0:5000
 cat index.html
+exit 1
 
 #echo "CI: exec run"
 #echo "working directory is \"$PWD\""
