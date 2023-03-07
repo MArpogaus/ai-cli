@@ -22,7 +22,7 @@ docker logs runner-mlflow-server
 sleep 1m
 docker ps -a
 docker logs runner-mlflow-server
-wget http://server:5000
+wget http://0.0.0.0:5000
 cat index.html
 
 #echo "CI: exec run"
