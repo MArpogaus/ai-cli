@@ -514,11 +514,14 @@ case ${CMD} in
     if [[ "$TARGET" ==  "runner" || "$TARGET" == "all" ]]; then
       docker build \
       -t "$IMAGE_NAME" \
+      -t "${USER}/runner" \
       --build-arg=BASE_IMAGE="ai-cli/${USER}:default" \
       "$DOCKER_COMPOSE_PATH"/workspace-dvc/
     fi
     if [[ "$TARGET" ==  "runner-cuda" || "$TARGET" == "all" ]]; then
           docker build \
+           -t "$IMAGE_NAME" \
+           -t "${USER}/runner" \
            --build-arg=BASE_IMAGE="$IMAGE_NAME" \
            "$DOCKER_COMPOSE_PATH"/workspace-dvc/
     fi
