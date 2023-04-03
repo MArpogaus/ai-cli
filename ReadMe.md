@@ -98,19 +98,17 @@ Assume a mlflow project at current working directory:
 Ai-cli is built to support tensorflow with cuda.
 To use cuda, a cuda-enabled image is necessary. 
 To create a cuda image, use the build command and specify the desired cuda version using the `-c` switch.
-The associated image then gets tagged as the version, prepended with a "c".
-To use cuda by default, simply tag the cuda image with the default tag:
-
-`ai-cli -c 11.2 -t default build`.
-
-Now the cuda image with version "11.2" is selected by default without the need to specify the tag everytime.
+Also, the build target should be extended with _-cuda_. See `ai-cli build` for a list of available targets.
+`ai-cli -c 11.2 build workspace-cuda`.
 
 For the cuda image to work, add the `-g` option when using any command. 
 This makes the gpu available and switches the runtime to "nvidia".
 Note that, the docker-nvidia-runtime needs to be set up correctly beforehand.
 
-For example `ai-cli -g 0 bash` opens a bash command line inside the container, exposing gpu "0".
-It can be verified that the gpu is used, using `nvidia-smi` inside the container.
+For example `ai-cli -g 0 -i ai-cli/${USER}:workspace-cuda bash` opens a bash command line inside the container, exposing gpu "0". Note, that we now need to specify an image (which we already built above) as the default image does not have cuda support enabled.
+It can be verified that the gpu is used, using `nvidia-smi` inside the container. Note, that the cuda version shown by nvidia-smi does not necessarily represent the correct version because of differences between driver API and runtime API version.
+
+To make use of multiple distinct cuda versions at the same time, rename one container using `docker image tag ai-cli/${USER}:workspace-cuda MY_NEW_IMAGE_NAME` make use of the `ai-cli -i MY_NEW_IMAGE_NAME [command]` feature.
 
 #### CML Runner
 
