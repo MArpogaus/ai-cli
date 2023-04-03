@@ -63,6 +63,27 @@ services:
       - mlflow_bridge
       - proxy_net
 
+  runner:
+    image: $IMAGE_NAME
+    user: jovyan
+    group_add:
+     - ${ADDITIONAL_GROUP:-users}
+    container_name: ${USER}-runner
+    runtime: ${RUNTIME}
+    working_dir: /home/${USER}
+    volumes: 
+     - ${MLFLOW_DATA}:/mlruns
+     - ${HOME_PATH}:/home/${USER}
+     - /etc/passwd:/etc/passwd:ro
+     - /etc/group:/etc/group:ro
+    environment:
+      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
+      CONDA_ENVS_PATH: ${CONDA_DIR}
+      NVIDIA_VISIBLE_DEVICES: "${GPUS}"
+    networks:
+     - mlflow_bridge
+     - proxy_net
+
 volumes:
   empty:
 

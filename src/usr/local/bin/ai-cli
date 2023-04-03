@@ -567,14 +567,7 @@ case ${CMD} in
 	GPUOPT="--gpus ${GPUS}"
       fi
 
-      docker run \
-      -e REPO_TOKEN="$TOKEN_ARG" \
-      -it \
-      --rm \
-      --user jovyan \
-      --network="${USER}_mlflow_bridge" \
-      --mount type=bind,source="$DVC_DATA",target=/data \
-      "ai-cli/${USER}:runner" cml runner launch \
+      docker_run runner cml runner launch \
       --repo="$URL_ARG" \
       --token="$TOKEN_ARG" \
       --driver="gitlab" \
