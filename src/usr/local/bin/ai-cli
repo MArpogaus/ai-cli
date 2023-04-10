@@ -567,6 +567,8 @@ case ${CMD} in
 	GPUOPT="--gpus ${GPUS}"
       fi
 
+      RUN_ARGS+=" -e REPO_TOKEN=$TOKEN_ARG" # required for runner to comment
+      RUN_ARGS+=" --user jovyan"
       docker_run runner $(select_image runner) cml runner launch \
       --repo="$URL_ARG" \
       --token="$TOKEN_ARG" \
