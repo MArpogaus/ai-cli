@@ -543,7 +543,7 @@ case ${CMD} in
     export MLFLOW_LOCAL_PROJECT
     echo "INFO: Running notebook server in: $MLFLOW_LOCAL_PROJECT"
     echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-    docker_run jupyter $(select-image workspace) $JUPYTER_CMD
+    docker_run jupyter $(select_image workspace) $JUPYTER_CMD
     ;;
   lab) # start jupyter lab server
     JUPYTER_VIRTUAL_HOST=$(disambiguate_host $LAB_VIRTUAL_HOST)
@@ -551,7 +551,7 @@ case ${CMD} in
     export MLFLOW_LOCAL_PROJECT
     echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
     echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-    docker_run jupyter $(select-image workspace) $JUPYTER_LAB_CMD
+    docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD
     ;;
   runner) # start cml runner for repo
       args=( "$@" )
@@ -567,7 +567,7 @@ case ${CMD} in
 	GPUOPT="--gpus ${GPUS}"
       fi
 
-      docker_run runner $(select-image runner) cml runner launch \
+      docker_run runner $(select_image runner) cml runner launch \
       --repo="$URL_ARG" \
       --token="$TOKEN_ARG" \
       --driver="gitlab" \
@@ -582,7 +582,7 @@ case ${CMD} in
       exit 1
     fi
     export MLFLOW_LOCAL_PROJECT
-    docker_run workspace $(select-image workspace) $*
+    docker_run workspace $(select_image workspace) $*
     ;;
   run) # run MLProject from @PATH inside container
     if [[ $# == 0 ]]; then
@@ -598,7 +598,7 @@ case ${CMD} in
     export MLFLOW_LOCAL_PROJECT
     echo "INFO: Running MLProject from $MLFLOW_LOCAL_PROJECT"
     echo "INFO: Executed Command:  mlflow run $*"
-    docker_run workspace $(select-image workspace) mlflow run $*
+    docker_run workspace $(select_image workspace) mlflow run $*
     ;;
   run-from-git) # run MLProject from git repo at @URI inside container
     if [[ $# != 0 && -z $MLFLOW_GIT_PROJECT ]]; then
@@ -609,7 +609,7 @@ case ${CMD} in
       exit 1
     fi
     echo "INFO: Running MLProject from $MLFLOW_GIT_PROJECT"
-    docker_run workspace $(select-image workspace) mlflow run $MLFLOW_GIT_PROJECT
+    docker_run workspace $(select_image workspace) mlflow run $MLFLOW_GIT_PROJECT
     ;;
   info) # show basic paths and env variables
       echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
