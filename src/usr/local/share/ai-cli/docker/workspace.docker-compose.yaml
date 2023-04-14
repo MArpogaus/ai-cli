@@ -65,7 +65,7 @@ services:
 
   runner:
     image: $IMAGE_NAME
-    user: jovyan
+    user: ${DOCKER_USER}
     group_add:
      - ${ADDITIONAL_GROUP:-users}
     container_name: ${USER}-runner

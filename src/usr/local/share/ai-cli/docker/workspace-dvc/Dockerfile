@@ -1,6 +1,6 @@
 ARG BASE_IMAGE
 FROM $BASE_IMAGE
-user root
+USER root
 RUN echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/90assumeyes
 
 # INSTALL CORE DEPENDENCIES
@@ -83,13 +83,8 @@ RUN add-apt-repository universe --yes \
 
 
 # CONFIGURE RUNNER PATH
-ENV CML_RUNNER_PATH=/home/runner
-ENV MLRUNS_PATH=/mlruns
-RUN mkdir -p ${CML_RUNNER_PATH} && chown jovyan "$CML_RUNNER_PATH" && chmod 777 "${CML_RUNNER_PATH}"
-RUN mkdir -p "$MLRUNS_PATH" && chown jovyan "$MLRUNS_PATH" && chmod 777 "$MLRUNS_PATH"
-#RUN chown jovyan "/home/$USER"
-ENV HOME="$CML_RUNNER_PATH"
-WORKDIR ${CML_RUNNER_PATH}
+ENV CML_RUNNER_PATH=/runner
+RUN mkdir -p ${CML_RUNNER_PATH} && chown ${NB_UID}:${NB_GID} "$CML_RUNNER_PATH" && chmod 700 "${CML_RUNNER_PATH}"
 
 # SET SPECIFIC ENVIRONMENT VARIABLES
 ENV IN_DOCKER=1
