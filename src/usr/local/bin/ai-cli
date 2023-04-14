@@ -492,7 +492,8 @@ case ${CMD} in
       echo "INFO: Building without cuda"
       echo "INFO: Building workspace"
       docker build \
-        -t  $(build_image_name $IMAGE_PREFIX workspace)\
+        --pull \
+        -t $(build_image_name $IMAGE_PREFIX workspace)\
         --build-arg=ARG_NB_USER="$USER" \
         --build-arg=ARG_NB_UID="$NB_UID" \
         --build-arg=ARG_NB_GID="$NB_GID" \
@@ -528,6 +529,7 @@ case ${CMD} in
       
     echo "INFO: Building mlflow server"
     docker build \
+        --pull \
         -t $(build_image_name $IMAGE_PREFIX mlflow) \
         --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
         --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
