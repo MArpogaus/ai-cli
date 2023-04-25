@@ -399,15 +399,17 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
       MLFLOW_EXPERIMENT_NAME=${OPTARG}
       ;;
     c) # Build with cuda support. Specify @CUDA version to use. Tags image with 'c<VERSION>' by default.
-      #valid_c=false
-      #for token in "$@"; do
-      #  if [[ $token == "build" ]]; then
-      #    valid_c=true
-      #  fi
-      #done
       valid_c=true
+      invalid_cuda_tokens=("reset-password" "version" "status" "restart-mlflow" "stop-mlflow" "start-mlflow" "init")
+      argument_tokens=( "$@" )
+      for token in ${argument_tokens[@]}; do
+          # test if any token is invalid (https://stackoverflow.com/a/41395983)
+          if [[ " ${invalid_cuda_tokens[*]} " == *"$token"* ]]; then
+            valid_c=false
+          fi 
+      done
       if [[ $valid_c == false ]]; then
-        echo "ERROR: -c used in wrong context. Only valid when you call 'build'."
+        echo "ERROR: -c used in wrong context. Not valid with $invalid_cuda_tokens."
         exit 1
       fi
       echo "IFNO: setting cuda version to $OPTARG"
