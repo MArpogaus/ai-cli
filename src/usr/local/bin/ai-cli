@@ -530,8 +530,9 @@ case ${CMD} in
            --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
            "$DOCKER_COMPOSE_PATH"/workspace-dvc/
     fi
-      
-    echo "INFO: Building mlflow server ${$(build_image_name $IMAGE_PREFIX mlflow)}"
+
+    _TAG=$(build_image_name $IMAGE_PREFIX mlflow)    
+    echo "INFO: Building mlflow server ${_TAG}"
     docker build \
         --pull \
         -t $(build_image_name $IMAGE_PREFIX mlflow) \
