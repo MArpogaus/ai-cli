@@ -125,7 +125,8 @@ init() {
   chmod 777 $EXTENSION_PATH
   echo "INFO: init docker workspace"
   ai-cli build
-  docker_run workspace ${IMAGE_NAME_WORKSPACE_DEFAULT} mamba init &>/dev/null
+  echo "INFO: init conda"
+  docker_run workspace $(select_image workspace) mamba init &>/dev/null
   echo "INFO: Initialization complete"
 }
 check_init() {
