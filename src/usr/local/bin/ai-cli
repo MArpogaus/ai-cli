@@ -531,7 +531,7 @@ case ${CMD} in
            "$DOCKER_COMPOSE_PATH"/workspace-dvc/
     fi
       
-    echo "INFO: Building mlflow server"
+    echo "INFO: Building mlflow server ${$(build_image_name $IMAGE_PREFIX mlflow)}"
     docker build \
         --pull \
         -t $(build_image_name $IMAGE_PREFIX mlflow) \
