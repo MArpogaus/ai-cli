@@ -129,6 +129,7 @@ init() {
   echo "INFO: init conda"
   docker_run workspace $(select_image workspace) mamba init &>/dev/null
   echo "INFO: Initialization complete"
+  ai-cli status
 }
 check_init() {
   err_cnt=0
