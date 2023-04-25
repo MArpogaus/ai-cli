@@ -114,6 +114,7 @@ basic_auth() {
     htpasswd -Bb -c "${HTPASSWD_PATH}/$1" $username $password
 
   fi
+  echo "INFO: basic_auth complete"
 }
 init() {
   echo "INFO: Initialization started"
