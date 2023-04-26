@@ -98,19 +98,38 @@ Assume a mlflow project at current working directory:
 Ai-cli is built to support tensorflow with cuda.
 To use cuda, a cuda-enabled image is necessary. 
 To create a cuda image, use the build command and specify the desired cuda version using the `-c` switch.
-The associated image then gets tagged as the version, prepended with a "c".
-To use cuda by default, simply tag the cuda image with the default tag:
+`ai-cli -c 11.2 build`.
 
-`ai-cli -c 11.2 -t default build`.
-
-Now the cuda image with version "11.2" is selected by default without the need to specify the tag everytime.
-
-For the cuda image to work, add the `-g` option when using any command. 
-This makes the gpu available and switches the runtime to "nvidia".
+For the cuda image to work, add the `-g` option when using any command to actually include gpus that cuda can use. 
+This makes the specified gpu(s) available and switches the runtime to "nvidia".
 Note that, the docker-nvidia-runtime needs to be set up correctly beforehand.
 
-For example `ai-cli -g 0 bash` opens a bash command line inside the container, exposing gpu "0".
-It can be verified that the gpu is used, using `nvidia-smi` inside the container.
+For example `ai-cli -g 0 -c 11.2 bash` opens a bash command line with inside the container, exposing gpu "0" with support for cuda 11.2. Note, that the images for cuda 11.2 need to be built beforhand as stated above.
+It can be verified that the gpu is used, using `nvidia-smi` inside the container. Note, that the cuda version shown by nvidia-smi does not necessarily represent the correct version because of differences between driver API and runtime API version.
+Also, the command is not installed by default.
+
+#### CML Runner
+
+Ai-cli supports starting a CML runner locally for your CI/CD Workflow.
+
+Here is how to use `ai-cli runner GIT-ORIGIN-HTTPS ACCESS-TOKEN`.
+
+1. Create access token for your project (as owner, scope: api in gitlab) or personal access token.
+2. Enable CI for your repository. (Settings->General->Visibility, project features, permissions->Repository->CI/CD->Save Changes in gitlab)
+3. Configure pipeline (.gitlab-ci.yml, in gitlab). For the local runner to pickup a job, the job needs to have the tag `ai-cli`.
+   For Example:
+   ```yml
+   test:
+    tags:
+     - ai-cli
+    script:
+     - echo "Hello World" >> report.md
+     - cml comment create report.md
+   ```
+4. Copy the https clone link for your repository. Start your local runner using this link.
+
+Now the runner is ready to pick up your jobs.
+
 
 ## Troubleshooting
 

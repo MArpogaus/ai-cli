@@ -1,3 +1,5 @@
 #!/bin/bash
-ai-cli start-server
-#ai-cli -n basic run .
+
+
+ai-cli start-mlflow
+ai-cli -n basic run .

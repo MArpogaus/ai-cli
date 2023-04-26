@@ -262,3 +262,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,windows,emacs,vim,python
+
+
+# AI_CLI_SPECIFIC
+src/etc/ai-cli/version

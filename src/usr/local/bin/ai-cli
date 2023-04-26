@@ -67,12 +67,32 @@ dc() {
     $*
 }
 
+# docker_run PARAM runs PARAM as command with workspace.docker-compose.yaml
 docker_run() {
   SERVICE_NAME=$1
-  shift
+  IMAGE_NAME=$2
+  shift 2
+  export IMAGE_NAME
+  echo "INFO: Using image ${IMAGE_NAME}"  
   dc workspace --project-directory "$PWD" \
     run $RUN_ARGS \
     $SERVICE_NAME "$*"
+}
+
+build_image_name() {
+  PREFIX=$1
+  NAME=$2
+  CUDA=$3
+  if [[ -z "$CUDA" ]]; then
+    echo "${PREFIX}:${NAME}"
+  else
+    echo "${PREFIX}:${NAME}-cuda${CUDA}"
+  fi
+}
+
+select_image() {
+  NAME=$1
+  echo ${IMAGE_NAME:-$(build_image_name $IMAGE_PREFIX $NAME $CUDA_VERSION)}
 }
 
 basic_auth() {
@@ -93,6 +113,7 @@ basic_auth() {
     htpasswd -Bb -c "${HTPASSWD_PATH}/$1" $username $password
 
   fi
+  echo "INFO: basic_auth complete"
 }
 init() {
   echo "INFO: Initialization started"
@@ -103,11 +124,11 @@ init() {
   mkdir -p $EXTENSION_PATH
   chmod 777 $EXTENSION_PATH
   echo "INFO: init docker workspace"
-  ai-cli build &>/dev/null
-  docker_run workspace mamba init &>/dev/null
-  echo "INFO: init mlflow server"
-  ai-cli build-server &>/dev/null
+  ai-cli build
+  echo "INFO: init conda"
+  docker_run workspace $(select_image workspace) mamba init &>/dev/null
   echo "INFO: Initialization complete"
+  ai-cli status
 }
 check_init() {
   err_cnt=0
@@ -297,6 +318,7 @@ show_status() {
 # Read configuration file #####################################################
 CONFIG_PATH=/etc/ai-cli/config
 source $CONFIG_PATH
+VERSION=$(cat /etc/ai-cli/version)
 
 # Check if paths correctly configured
 for p in DOCKER_COMPOSE_PATH HTPASSWD_PATH MLFLOW_DATA; do
@@ -339,7 +361,7 @@ RUNTIME=$(docker info | grep -i "Default Runtime")
 RUNTIME=${RUNTIME#*: }
 
 # define image repo prefix and tag
-IMAGE_TAG="default"
+IMAGE_DEFAULT_TAG="workspace-default"
 IMAGE_PREFIX=ai-cli/${USER}
 
 # CLI args defaults
@@ -347,7 +369,9 @@ GPUS=""
 RUN_VOLUMES=()
 RUN_ARGS="--rm"
 CONDA_DIR="/home/${USER}/.conda/envs/"
-
+#if [[ "$CUDA_VERSION" == "" ]]; then
+#   CUDA_VERSION="11.2"
+#fi
 # CLI Arguments ################################################################
 while getopts :he:g:n:c:v:i:t:r: flag; do
   case "${flag}" in
@@ -377,16 +401,20 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
       MLFLOW_EXPERIMENT_NAME=${OPTARG}
       ;;
     c) # Build with cuda support. Specify @CUDA version to use. Tags image with 'c<VERSION>' by default.
-      valid_c=false
-      for token in "$@"; do
-        if [[ $token == "build" ]]; then
-          valid_c=true
-        fi
+      valid_c=true
+      invalid_cuda_tokens=("reset-password" "version" "status" "restart-mlflow" "stop-mlflow" "start-mlflow" "init")
+      argument_tokens=( "$@" )
+      for token in ${argument_tokens[@]}; do
+          # test if any token is invalid (https://stackoverflow.com/a/41395983)
+          if [[ " ${invalid_cuda_tokens[*]} " == *"$token"* ]]; then
+            valid_c=false
+          fi 
       done
       if [[ $valid_c == false ]]; then
-        echo "ERROR: -c used in wrong context. Only valid when you call 'build'."
+        echo "ERROR: -c used in wrong context. Not valid with $invalid_cuda_tokens."
         exit 1
       fi
+      echo "INFO: setting cuda version to $OPTARG"
       CUDA_VERSION=${OPTARG}
       IMAGE_TAG=c"$CUDA_VERSION"
 
@@ -404,9 +432,6 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
       fi
       IMAGE_NAME="${OPTARG}"
       ;;
-    t) # Specify image @TAG to be used.
-      IMAGE_TAG="${OPTARG}"
-      ;;
     *) show_help && exit 0 ;;
   esac
 done
@@ -418,11 +443,6 @@ for v in ${RUN_VOLUMES[@]}; do
 done
 if [[ -n $MLFLOW_EXPERIMENT_NAME ]]; then
   RUN_ARGS+=" -e MLFLOW_EXPERIMENT_NAME=$MLFLOW_EXPERIMENT_NAME"
-fi
-
-# BUILD IMAGE NAME TO USE
-if [[ -z $IMAGE_NAME ]]; then
-  IMAGE_NAME=${IMAGE_PREFIX}:${IMAGE_TAG}
 fi
 
 # Exports #####################################################################
@@ -446,7 +466,6 @@ export RUNTIME
 export URLNAME
 
 # show docker info ####################################################################
-echo "INFO: Using image ${IMAGE_NAME}"
 echo "INFO: using runtime $RUNTIME"
 [ $GPUS ] && echo "INFO: using gpus '$GPUS'"
 # Run command ##################################################################
@@ -459,60 +478,71 @@ fi
 case ${CMD} in
   init) # initialize this script for your user
     init ;;
-  start-server) # start mlflow server
+  start-mlflow) # start mlflow server
     basic_auth "$MLFLOW_VIRTUAL_HOST"
     dc server up -d
     ;;
-  stop-server) # stop mlflow server
+  stop-mlflow) # stop mlflow server
     dc server down ;;
-  restart-server) # restart mlflow server
+  restart-mlflow) # restart mlflow server
     dc server down
     ai-cli build-server
     dc server up -d
     ;;
-  build-server) # build mlflow server
-  docker build \
-      -t ai-cli/mlflow-server \
-      --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
-      --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
-      $DOCKER_COMPOSE_PATH/mlflow
-    ;;
   status) # show status of your environment
     show_status ;;
   build) # build image from dockerfile
+    if [[ -z "${CUDA_VERSION}" ]]; then
+      echo "INFO: Building without cuda"
+      echo "INFO: Building workspace"
+      docker build \
+        --pull \
+        -t $(build_image_name $IMAGE_PREFIX workspace)\
+        --build-arg=ARG_NB_USER="$USER" \
+        --build-arg=ARG_NB_UID="$NB_UID" \
+        --build-arg=ARG_NB_GID="$NB_GID" \
+        --build-arg=ARG_HOME="/home/${USER}" \
+        --build-arg=PYTHON_VERSION="$PYTHON_VERSION" \
+        --build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
+        $DOCKER_COMPOSE_PATH/workspace-base/
 
-    # workspace-cuda depends on workspace-base image existing so is always built
-    echo "INFO: Specified Cuda Version: '${CUDA_VERSION}'"
-    echo "INFO: Building workspace-base"
-    docker build \
-      -t ${IMAGE_NAME} \
-      -t ${IMAGE_PREFIX}:base \
-      --build-arg=ARG_NB_USER="$USER" \
-      --build-arg=ARG_NB_UID="$NB_UID" \
-      --build-arg=ARG_NB_GID="$NB_GID" \
-      --build-arg=ARG_HOME="/home/${USER}" \
-      --build-arg=PYTHON_VERSION="$PYTHON_VERSION" \
-      --build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
-      $DOCKER_COMPOSE_PATH/workspace-base/
+      echo "INFO: Building runner"
+      docker build \
+      -t  $(build_image_name $IMAGE_PREFIX runner) \
+      --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
+      "$DOCKER_COMPOSE_PATH"/workspace-dvc/
 
-    if [ ${CUDA_VERSION} ]; then
-      echo "INFO: Building workspace-cuda"
+      else
+      echo "INFO: Building with cuda $CUDA_VERSION"
+      echo "INFO: Building workspace"
       # version formats vary so we need to split into major and minor version
       CMAJ=${CUDA_VERSION%\.*}
       CMIN=${CUDA_VERSION#*\.}
-      echo "INFO: CMAJ ${CMAJ}, CMIN ${CMIN}"
-      echo "INFO: NVIDIA DRIVER ${DRIVER_VERSION}"
       docker build \
-        -t ${IMAGE_NAME} \
-        --build-arg=BASE_IMAGE="${IMAGE_PREFIX}:base" \
+        -t $(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
+        --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
         --build-arg=CMAJ="$CMAJ" \
         --build-arg=CMIN="$CMIN" \
         $DOCKER_COMPOSE_PATH/workspace-cuda/
+
+      docker build \
+           -t  $(build_image_name $IMAGE_PREFIX runner $CUDA_VERSION) \
+           --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
+           "$DOCKER_COMPOSE_PATH"/workspace-dvc/
     fi
+
+    _TAG=$(build_image_name $IMAGE_PREFIX mlflow)    
+    echo "INFO: Building mlflow server ${_TAG}"
+    docker build \
+        --pull \
+        -t $(build_image_name $IMAGE_PREFIX mlflow) \
+        --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
+        --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
+        $DOCKER_COMPOSE_PATH/mlflow
     ;;
   bash) # start bash shell inside container
     export MLFLOW_LOCAL_PROJECT
-    docker_run workspace bash
+    docker_run workspace $(select_image workspace) bash
     ;;
   notebook) # start jupyter notebook server
     JUPYTER_VIRTUAL_HOST=$(disambiguate_host $NOTEBOOK_VIRTUAL_HOST)
@@ -520,7 +550,7 @@ case ${CMD} in
     export MLFLOW_LOCAL_PROJECT
     echo "INFO: Running notebook server in: $MLFLOW_LOCAL_PROJECT"
     echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-    docker_run jupyter $JUPYTER_CMD
+    docker_run jupyter $(select_image workspace) $JUPYTER_CMD
     ;;
   lab) # start jupyter lab server
     JUPYTER_VIRTUAL_HOST=$(disambiguate_host $LAB_VIRTUAL_HOST)
@@ -528,7 +558,31 @@ case ${CMD} in
     export MLFLOW_LOCAL_PROJECT
     echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
     echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-    docker_run jupyter $JUPYTER_LAB_CMD
+    docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD
+    ;;
+  runner) # start cml runner for repo
+      args=( "$@" )
+      if [[ ${#args[@]} -ne 2 ]]; then
+        echo "please provide URL and TOKEN"
+        exit 1
+      fi
+      TOKEN_ARG="${args[-1]}"
+      URL_ARG="${args[-2]}"
+      echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'. GPUS: ${GPUS}"
+      GPUOPT=""
+      if [[ -n "$GPUS" ]]; then
+	GPUOPT="--gpus ${GPUS}"
+      fi
+
+      RUN_ARGS+=" -e REPO_TOKEN=$TOKEN_ARG" # required for runner to comment
+      #RUN_ARGS+=" --user jovyan"
+      docker_run runner $(select_image runner) cml runner launch \
+      --repo="$URL_ARG" \
+      --token="$TOKEN_ARG" \
+      --driver="gitlab" \
+      --labels="local,runner,ai-cli" \
+      --idle-timeout -1
+      
     ;;
   exec) # execute @PROGRAMM inside container
     if [[ $# == 0 ]]; then
@@ -537,7 +591,7 @@ case ${CMD} in
       exit 1
     fi
     export MLFLOW_LOCAL_PROJECT
-    docker_run workspace $*
+    docker_run workspace $(select_image workspace) $*
     ;;
   run) # run MLProject from @PATH inside container
     if [[ $# == 0 ]]; then
@@ -553,7 +607,7 @@ case ${CMD} in
     export MLFLOW_LOCAL_PROJECT
     echo "INFO: Running MLProject from $MLFLOW_LOCAL_PROJECT"
     echo "INFO: Executed Command:  mlflow run $*"
-    docker_run workspace mlflow run $*
+    docker_run workspace $(select_image workspace) mlflow run $*
     ;;
   run-from-git) # run MLProject from git repo at @URI inside container
     if [[ $# != 0 && -z $MLFLOW_GIT_PROJECT ]]; then
@@ -564,7 +618,7 @@ case ${CMD} in
       exit 1
     fi
     echo "INFO: Running MLProject from $MLFLOW_GIT_PROJECT"
-    docker_run workspace mlflow run $MLFLOW_GIT_PROJECT
+    docker_run workspace $(select_image workspace) mlflow run $MLFLOW_GIT_PROJECT
     ;;
   info) # show basic paths and env variables
       echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
@@ -572,6 +626,10 @@ case ${CMD} in
       echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
       echo "INFO: URLNAME=${URLNAME}"
       echo "INFO: EXTENSION_PATH=${EXTENSION_PATH}"
+      echo "INFO: VERSION=${VERSION}"
+    ;;
+  version) # show git commit hash this script is installed with
+      echo "$VERSION"
     ;;
   reset-password) # Reset Password for mlflow you will setup a new one at next server start
     rm "${HTPASSWD_PATH}/${MLFLOW_VIRTUAL_HOST}"
