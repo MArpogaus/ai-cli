@@ -414,7 +414,7 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
         echo "ERROR: -c used in wrong context. Not valid with $invalid_cuda_tokens."
         exit 1
       fi
-      echo "IFNO: setting cuda version to $OPTARG"
+      echo "INFO: setting cuda version to $OPTARG"
       CUDA_VERSION=${OPTARG}
       IMAGE_TAG=c"$CUDA_VERSION"
 
