@@ -71,8 +71,7 @@ dc() {
 docker_run() {
   SERVICE_NAME=$1
   IMAGE_NAME=$2
-  shift
-  shift
+  shift 2
   export IMAGE_NAME
   echo "INFO: Using image ${IMAGE_NAME}"  
   dc workspace --project-directory "$PWD" \
