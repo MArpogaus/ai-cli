@@ -18,7 +18,7 @@ version: '3'
 services:
 
   server:
-    image: ai-cli/julian:mlflow
+    image: ai-cli/${USER}:mlflow
     user: $DOCKER_USER
     container_name: ${USER}-mlflow-server
     command:
