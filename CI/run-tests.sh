@@ -22,12 +22,13 @@ docker logs runner-mlflow-server
 docker ps -a
 docker network ls
 docker logs runner-mlflow-server
-wget http://0.0.0.0:5000
-cat index.html
-exit 1
+# connection refused?
+#wget http://0.0.0.0:5000
+#cat index.html
+#exit 1
 
 #echo "CI: exec run"
 #echo "working directory is \"$PWD\""
-#ls -al
-#cd examples/basic && bash -x ./ci-tests.sh
+#ls -a
+cd examples/basic && bash -x ./ci-tests.sh
 #echo "CI: exec run finished successfully"
