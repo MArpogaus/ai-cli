@@ -73,7 +73,7 @@ docker_run() {
   IMAGE_NAME=$2
   shift 2
   export IMAGE_NAME
-  echo "INFO: Using image ${IMAGE_NAME}"  
+  echo "INFO: Using image ${IMAGE_NAME}"
   dc workspace --project-directory "$PWD" \
     run $RUN_ARGS \
     $SERVICE_NAME "$*"
@@ -83,7 +83,7 @@ build_image_name() {
   PREFIX=$1
   NAME=$2
   CUDA=$3
-  if [[ -z "$CUDA" ]]; then
+  if [[ -z $CUDA ]]; then
     echo "${PREFIX}:${NAME}"
   else
     echo "${PREFIX}:${NAME}-cuda${CUDA}"
@@ -377,7 +377,7 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
   case "${flag}" in
     v) # Specify additional docker @VOLUME@s
       # -v is only valid on certain commands
-      valid_commands=("bash run lab notebook")
+      valid_commands=("bash run lab notebook runner")
       valid_v=false
       for token in "$@"; do
         if [[ " ${valid_commands[*]} " =~ " ${token} " ]]; then
@@ -403,12 +403,12 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
     c) # Build with cuda support. Specify @CUDA version to use. Tags image with 'c<VERSION>' by default.
       valid_c=true
       invalid_cuda_tokens=("reset-password" "version" "status" "restart-mlflow" "stop-mlflow" "start-mlflow" "init")
-      argument_tokens=( "$@" )
+      argument_tokens=("$@")
       for token in ${argument_tokens[@]}; do
-          # test if any token is invalid (https://stackoverflow.com/a/41395983)
-          if [[ " ${invalid_cuda_tokens[*]} " == *"$token"* ]]; then
-            valid_c=false
-          fi 
+        # test if any token is invalid (https://stackoverflow.com/a/41395983)
+        if [[ " ${invalid_cuda_tokens[*]} " == *"$token"* ]]; then
+          valid_c=false
+        fi
       done
       if [[ $valid_c == false ]]; then
         echo "ERROR: -c used in wrong context. Not valid with $invalid_cuda_tokens."
@@ -492,12 +492,12 @@ case ${CMD} in
   status) # show status of your environment
     show_status ;;
   build) # build image from dockerfile
-    if [[ -z "${CUDA_VERSION}" ]]; then
+    if [[ -z ${CUDA_VERSION} ]]; then
       echo "INFO: Building without cuda"
       echo "INFO: Building workspace"
       docker build \
         --pull \
-        -t $(build_image_name $IMAGE_PREFIX workspace)\
+        -t $(build_image_name $IMAGE_PREFIX workspace) \
         --build-arg=ARG_NB_USER="$USER" \
         --build-arg=ARG_NB_UID="$NB_UID" \
         --build-arg=ARG_NB_GID="$NB_GID" \
@@ -508,11 +508,11 @@ case ${CMD} in
 
       echo "INFO: Building runner"
       docker build \
-      -t  $(build_image_name $IMAGE_PREFIX runner) \
-      --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
-      "$DOCKER_COMPOSE_PATH"/workspace-dvc/
+        -t $(build_image_name $IMAGE_PREFIX runner) \
+        --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
+        "$DOCKER_COMPOSE_PATH"/workspace-dvc/
 
-      else
+    else
       echo "INFO: Building with cuda $CUDA_VERSION"
       echo "INFO: Building workspace"
       # version formats vary so we need to split into major and minor version
@@ -526,19 +526,19 @@ case ${CMD} in
         $DOCKER_COMPOSE_PATH/workspace-cuda/
 
       docker build \
-           -t  $(build_image_name $IMAGE_PREFIX runner $CUDA_VERSION) \
-           --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
-           "$DOCKER_COMPOSE_PATH"/workspace-dvc/
+        -t $(build_image_name $IMAGE_PREFIX runner $CUDA_VERSION) \
+        --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
+        "$DOCKER_COMPOSE_PATH"/workspace-dvc/
     fi
 
-    _TAG=$(build_image_name $IMAGE_PREFIX mlflow)    
+    _TAG=$(build_image_name $IMAGE_PREFIX mlflow)
     echo "INFO: Building mlflow server ${_TAG}"
     docker build \
-        --pull \
-        -t $(build_image_name $IMAGE_PREFIX mlflow) \
-        --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
-        --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
-        $DOCKER_COMPOSE_PATH/mlflow
+      --pull \
+      -t $(build_image_name $IMAGE_PREFIX mlflow) \
+      --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
+      --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
+      $DOCKER_COMPOSE_PATH/mlflow
     ;;
   bash) # start bash shell inside container
     export MLFLOW_LOCAL_PROJECT
@@ -561,28 +561,28 @@ case ${CMD} in
     docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD
     ;;
   runner) # start cml runner for repo
-      args=( "$@" )
-      if [[ ${#args[@]} -ne 2 ]]; then
-        echo "please provide URL and TOKEN"
-        exit 1
-      fi
-      TOKEN_ARG="${args[-1]}"
-      URL_ARG="${args[-2]}"
-      echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'. GPUS: ${GPUS}"
-      GPUOPT=""
-      if [[ -n "$GPUS" ]]; then
-	GPUOPT="--gpus ${GPUS}"
-      fi
+    args=("$@")
+    if [[ ${#args[@]} -ne 2 ]]; then
+      echo "please provide URL and TOKEN"
+      exit 1
+    fi
+    TOKEN_ARG="${args[-1]}"
+    URL_ARG="${args[-2]}"
+    echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'. GPUS: ${GPUS}"
+    GPUOPT=""
+    if [[ -n $GPUS ]]; then
+      GPUOPT="--gpus ${GPUS}"
+    fi
 
-      RUN_ARGS+=" -e REPO_TOKEN=$TOKEN_ARG" # required for runner to comment
-      #RUN_ARGS+=" --user jovyan"
-      docker_run runner $(select_image runner) cml runner launch \
+    RUN_ARGS+=" -e REPO_TOKEN=$TOKEN_ARG" # required for runner to comment
+    #RUN_ARGS+=" --user jovyan"
+    docker_run runner $(select_image runner) cml runner launch \
       --repo="$URL_ARG" \
       --token="$TOKEN_ARG" \
       --driver="gitlab" \
       --labels="local,runner,ai-cli" \
       --idle-timeout -1
-      
+
     ;;
   exec) # execute @PROGRAMM inside container
     if [[ $# == 0 ]]; then
@@ -621,15 +621,15 @@ case ${CMD} in
     docker_run workspace $(select_image workspace) mlflow run $MLFLOW_GIT_PROJECT
     ;;
   info) # show basic paths and env variables
-      echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
-      echo "INFO: DOCKER_USER=${DOCKER_USER}"
-      echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
-      echo "INFO: URLNAME=${URLNAME}"
-      echo "INFO: EXTENSION_PATH=${EXTENSION_PATH}"
-      echo "INFO: VERSION=${VERSION}"
+    echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
+    echo "INFO: DOCKER_USER=${DOCKER_USER}"
+    echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
+    echo "INFO: URLNAME=${URLNAME}"
+    echo "INFO: EXTENSION_PATH=${EXTENSION_PATH}"
+    echo "INFO: VERSION=${VERSION}"
     ;;
   version) # show git commit hash this script is installed with
-      echo "$VERSION"
+    echo "$VERSION"
     ;;
   reset-password) # Reset Password for mlflow you will setup a new one at next server start
     rm "${HTPASSWD_PATH}/${MLFLOW_VIRTUAL_HOST}"
