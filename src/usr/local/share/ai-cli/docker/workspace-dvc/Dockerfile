@@ -32,7 +32,9 @@ ENV LC_ALL="en_US.UTF-8"
 # INSTALL NODE, GIT & GO
 RUN add-apt-repository ppa:git-core/ppa --yes \
  && add-apt-repository ppa:longsleep/golang-backports --yes \
- && curl --location https://deb.nodesource.com/setup_16.x | bash \
+ && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+ && NODE_MAJOR=16 \
+ && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list \
  && apt-get update \
  && apt-get install --yes git golang-go nodejs \
  && apt-get clean \
@@ -62,8 +64,7 @@ RUN cd /etc/apt/sources.list.d \
 
 # INSTALL CML
 ARG CML_VERSION=0
-RUN npm config set user 0 \
- && npm install --global "@dvcorg/cml@${CML_VERSION}"
+RUN npm install --global "@dvcorg/cml@${CML_VERSION}"
 
 # INSTALL VEGA
 RUN add-apt-repository universe --yes \
@@ -77,7 +78,6 @@ RUN add-apt-repository universe --yes \
     libfontconfig-dev \
  && apt-get clean \
  && rm --recursive --force /var/lib/apt/lists/* \
- && npm config set user 0 \
  && npm install --global canvas@2 vega@5 vega-cli@5 vega-lite@5
 
 
