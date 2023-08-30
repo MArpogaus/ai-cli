@@ -502,6 +502,7 @@ case ${CMD} in
         --build-arg=ARG_NB_UID="$NB_UID" \
         --build-arg=ARG_NB_GID="$NB_GID" \
         --build-arg=ARG_HOME="/home/${USER}" \
+        --build-arg=BASE_WORKSPACE_IMAGE_TAG="$BASE_WORKSPACE_IMAGE_TAG" \
         --build-arg=PYTHON_VERSION="$PYTHON_VERSION" \
         --build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
         $DOCKER_COMPOSE_PATH/workspace-base/

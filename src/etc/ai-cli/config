@@ -1,10 +1,11 @@
+BASE_WORKSPACE_IMAGE_TAG=ubuntu-22.04
 DOCKER_COMPOSE_PATH=/usr/local/share/ai-cli/docker/
-HTPASSWD_PATH=/var/local/ai-cli/htpasswd
-HOME_PATH="${HOME}/.local/share/ai-cli/home"
 EXTENSION_PATH="${HOME}/.local/share/ai-cli/extensions"
-MLFLOW_DATA=/mnt/data/$USER/mlflow
-URLNAME=localhost
-MLFLOWPORT=5000
+HOME_PATH="${HOME}/.local/share/ai-cli/home"
+HTPASSWD_PATH=/var/local/ai-cli/htpasswd
 JUPYTERPORT=8888
-PYTHON_VERSION=3.8
+MLFLOWPORT=5000
+MLFLOW_DATA=/mnt/data/$USER/mlflow
 MLFLOW_VERSION="1.28.0"
+PYTHON_VERSION=3.8
+URLNAME=localhost

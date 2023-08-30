@@ -13,7 +13,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-FROM jupyter/minimal-notebook:ubuntu-20.04
+ARG BASE_WORKSPACE_IMAGE_TAG
+FROM jupyter/minimal-notebook:${BASE_WORKSPACE_IMAGE_TAG:-ubuntu-22.04}
 
 ARG ARG_NB_USER \
     ARG_NB_UID \
