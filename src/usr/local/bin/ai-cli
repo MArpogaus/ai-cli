@@ -350,7 +350,7 @@ GIT_USER_NAME="'$(git config --get user.name)'" # git used in workspace-base/ent
 GIT_USER_EMAIL="$(git config --get user.email)"
 MLFLOW_VIRTUAL_HOST=${USER}-mlflow.$URLNAME
 JUPYTER_CMD="jupyter notebook --notebook-dir=/app --ip 0.0.0.0 --no-browser"
-JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser --collaborative"
+JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser"
 JUPYTER_CONTAINER=$(docker ps -qf name=".*jupyter.*")
 NOTEBOOK_VIRTUAL_HOST=${USER}-notebook.$URLNAME
 LAB_VIRTUAL_HOST=${USER}-lab.$URLNAME
@@ -551,7 +551,7 @@ notebook) # start jupyter notebook server
 	export MLFLOW_LOCAL_PROJECT
 	echo "INFO: Running notebook server in: $MLFLOW_LOCAL_PROJECT"
 	echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-	docker_run jupyter $(select_image workspace) $JUPYTER_CMD
+	docker_run jupyter $(select_image workspace) $JUPYTER_CMD $*
 	;;
 lab) # start jupyter lab server
 	JUPYTER_VIRTUAL_HOST=$(disambiguate_host $LAB_VIRTUAL_HOST)
@@ -559,7 +559,7 @@ lab) # start jupyter lab server
 	export MLFLOW_LOCAL_PROJECT
 	echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
 	echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-	docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD
+	docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD $*
 	;;
 runner) # start cml runner for repo
 	args=("$@")
