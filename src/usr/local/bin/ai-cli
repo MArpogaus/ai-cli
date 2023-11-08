@@ -20,162 +20,162 @@ set -e
 
 # Function definitions #########################################################
 show_help() {
-  DSC_PATTERN="[[:alnum:][:blank:]_\.\(\)\$\-\,\'<>]"
-  DOC_PATTERN="#[[:blank:]]*($DSC_PATTERN*(@[A-Z]{3,}@?)?$DSC_PATTERN*)"
-  OPTIONS_PATTERN="^[[:blank:]]*([a-z])\)[[:blank:]]*${DOC_PATTERN}$"
-  OPTIONS=$(grep -P "$OPTIONS_PATTERN" "$0")
-  COMMANDS_PATTERN="^[[:blank:]]*([a-z\-]{3,})\)[[:blank:]]*${DOC_PATTERN}$"
-  COMMANDS=$(grep -P "$COMMANDS_PATTERN" "$0")
-  spaces=$(printf ' %.0s' {1..100})
-  echo "Usage: $(basename "$0") [OPTIONS] COMMAND [ARGS...]"
-  echo ""
-  echo "This script helps you to conduct your ai experiments."
-  echo ""
-  echo "Options:"
-  IFS=$'
+	DSC_PATTERN="[[:alnum:][:blank:]_\.\(\)\$\-\,\'<>]"
+	DOC_PATTERN="#[[:blank:]]*($DSC_PATTERN*(@[A-Z]{3,}@?)?$DSC_PATTERN*)"
+	OPTIONS_PATTERN="^[[:blank:]]*([a-z])\)[[:blank:]]*${DOC_PATTERN}$"
+	OPTIONS=$(grep -P "$OPTIONS_PATTERN" "$0")
+	COMMANDS_PATTERN="^[[:blank:]]*([a-z\-]{3,})\)[[:blank:]]*${DOC_PATTERN}$"
+	COMMANDS=$(grep -P "$COMMANDS_PATTERN" "$0")
+	spaces=$(printf ' %.0s' {1..100})
+	echo "Usage: $(basename "$0") [OPTIONS] COMMAND [ARGS...]"
+	echo ""
+	echo "This script helps you to conduct your ai experiments."
+	echo ""
+	echo "Options:"
+	IFS=$'
 '
-  for o in $OPTIONS 'h)#Show help'; do
-    [[ $o =~ $OPTIONS_PATTERN ]]
-    opt=${BASH_REMATCH[1]}
-    arg=$(tr -d @ <<<${BASH_REMATCH[3]})
-    desc=$(
-      export GPUS CUDA_VERSION
-      tr -d @ <<<${BASH_REMATCH[2]} | envsubst
-    )
-    d="$((18 - ${#cmd} - ${#arg}))"
-    printf "  -%s %s%0.*s%s\n" "$opt" "$arg" $d $spaces "$desc"
-  done
-  echo ""
-  echo "Commands:"
-  IFS=$'
+	for o in $OPTIONS 'h)#Show help'; do
+		[[ $o =~ $OPTIONS_PATTERN ]]
+		opt=${BASH_REMATCH[1]}
+		arg=$(tr -d @ <<<${BASH_REMATCH[3]})
+		desc=$(
+			export GPUS CUDA_VERSION
+			tr -d @ <<<${BASH_REMATCH[2]} | envsubst
+		)
+		d="$((18 - ${#cmd} - ${#arg}))"
+		printf "  -%s %s%0.*s%s\n" "$opt" "$arg" $d $spaces "$desc"
+	done
+	echo ""
+	echo "Commands:"
+	IFS=$'
 '
-  for c in $COMMANDS; do
-    [[ $c =~ $COMMANDS_PATTERN ]]
-    cmd=${BASH_REMATCH[1]}
-    arg=$(tr -d @ <<<${BASH_REMATCH[3]})
-    desc=$(tr -d @ <<<${BASH_REMATCH[2]})
-    d="$((20 - ${#cmd} - ${#arg}))"
-    printf "  %s %s%0.*s%s\n" "$cmd" "$arg" $d $spaces "$desc"
-  done
+	for c in $COMMANDS; do
+		[[ $c =~ $COMMANDS_PATTERN ]]
+		cmd=${BASH_REMATCH[1]}
+		arg=$(tr -d @ <<<${BASH_REMATCH[3]})
+		desc=$(tr -d @ <<<${BASH_REMATCH[2]})
+		d="$((20 - ${#cmd} - ${#arg}))"
+		printf "  %s %s%0.*s%s\n" "$cmd" "$arg" $d $spaces "$desc"
+	done
 }
 
 dc() {
-  FILE=$1
-  shift
-  docker-compose --project-name $USER-$FILE \
-    --file "${DOCKER_COMPOSE_PATH}/${FILE}.docker-compose.yaml" \
-    $*
+	FILE=$1
+	shift
+	docker-compose --project-name $USER-$FILE \
+		--file "${DOCKER_COMPOSE_PATH}/${FILE}.docker-compose.yaml" \
+		$*
 }
 
 # docker_run PARAM runs PARAM as command with workspace.docker-compose.yaml
 docker_run() {
-  SERVICE_NAME=$1
-  IMAGE_NAME=$2
-  shift 2
-  export IMAGE_NAME
-  echo "INFO: Using image ${IMAGE_NAME}"
-  dc workspace --project-directory "$PWD" \
-    run $RUN_ARGS \
-    $SERVICE_NAME "$*"
+	SERVICE_NAME=$1
+	IMAGE_NAME=$2
+	shift 2
+	export IMAGE_NAME
+	echo "INFO: Using image ${IMAGE_NAME}"
+	dc workspace --project-directory "$PWD" \
+		run $RUN_ARGS \
+		$SERVICE_NAME "$*"
 }
 
 build_image_name() {
-  PREFIX=$1
-  NAME=$2
-  CUDA=$3
-  if [[ -z $CUDA ]]; then
-    echo "${PREFIX}:${NAME}"
-  else
-    echo "${PREFIX}:${NAME}-cuda${CUDA}"
-  fi
+	PREFIX=$1
+	NAME=$2
+	CUDA=$3
+	if [[ -z $CUDA ]]; then
+		echo "${PREFIX}:${NAME}"
+	else
+		echo "${PREFIX}:${NAME}-cuda${CUDA}"
+	fi
 }
 
 select_image() {
-  NAME=$1
-  echo ${IMAGE_NAME:-$(build_image_name $IMAGE_PREFIX $NAME $CUDA_VERSION)}
+	NAME=$1
+	echo ${IMAGE_NAME:-$(build_image_name $IMAGE_PREFIX $NAME $CUDA_VERSION)}
 }
 
 basic_auth() {
-  echo "INFO: basic_auth ${HTPASSWD_PATH} -- $1"
-  # Create htpasswd for Basic Auth
-  if [[ ! -e ${HTPASSWD_PATH}/$1 ]]; then
-    echo "Please enter a username and password to restrict access to: $1"
-    # Read Username
-    echo -n "Username: "
-    read -r username
-    [ -z $username ] && exit 1
-    # Read Password
-    echo -n "Password: "
-    read -rs password
-    [ -z $password ] && exit 1
-    echo
+	echo "INFO: basic_auth ${HTPASSWD_PATH} -- $1"
+	# Create htpasswd for Basic Auth
+	if [[ ! -e ${HTPASSWD_PATH}/$1 ]]; then
+		echo "Please enter a username and password to restrict access to: $1"
+		# Read Username
+		echo -n "Username: "
+		read -r username
+		[ -z $username ] && exit 1
+		# Read Password
+		echo -n "Password: "
+		read -rs password
+		[ -z $password ] && exit 1
+		echo
 
-    htpasswd -Bb -c "${HTPASSWD_PATH}/$1" $username $password
+		htpasswd -Bb -c "${HTPASSWD_PATH}/$1" $username $password
 
-  fi
-  echo "INFO: basic_auth complete"
+	fi
+	echo "INFO: basic_auth complete"
 }
 init() {
-  echo "INFO: Initialization started"
-  echo "INFO: init ${USER}_mlflow_bridge"
-  docker network create ${USER}_mlflow_bridge &>/dev/null || true # to continue if already exists
-  echo "INFO: init ${HOME_PATH}"
-  mkdir -p ${HOME_PATH}
-  mkdir -p $EXTENSION_PATH
-  chmod 777 $EXTENSION_PATH
-  echo "INFO: init docker workspace"
-  ai-cli build
-  echo "INFO: init conda"
-  docker_run workspace $(select_image workspace) mamba init &>/dev/null
-  echo "INFO: Initialization complete"
-  ai-cli status
+	echo "INFO: Initialization started"
+	echo "INFO: init ${USER}_mlflow_bridge"
+	docker network create ${USER}_mlflow_bridge &>/dev/null || true # to continue if already exists
+	echo "INFO: init ${HOME_PATH}"
+	mkdir -p ${HOME_PATH}
+	mkdir -p $EXTENSION_PATH
+	chmod 777 $EXTENSION_PATH
+	echo "INFO: init docker workspace"
+	ai-cli build
+	echo "INFO: init conda"
+	docker_run workspace $(select_image workspace) mamba init &>/dev/null
+	echo "INFO: Initialization complete"
+	ai-cli status
 }
 check_init() {
-  err_cnt=0
-  # check dependencies that can be set up using init()
-  if [[ -n $(docker network inspect $(docker network ls -q) | grep "${USER}_mlflow_bridge") ]] &&
-    [[ -w ${HOME_PATH} ]]; then
-    : # null command
-  else
-    echo ""
-    echo "################################################################"
-    echo ""
-    echo "ERROR:    Incomplete initialization!"
-    echo "          Please run 'ai-cli init'."
-    echo ""
-    echo "################################################################"
-    echo ""
+	err_cnt=0
+	# check dependencies that can be set up using init()
+	if [[ -n $(docker network inspect $(docker network ls -q) | grep "${USER}_mlflow_bridge") ]] &&
+		[[ -w ${HOME_PATH} ]]; then
+		: # null command
+	else
+		echo ""
+		echo "################################################################"
+		echo ""
+		echo "ERROR:    Incomplete initialization!"
+		echo "          Please run 'ai-cli init'."
+		echo ""
+		echo "################################################################"
+		echo ""
 
-    ((err_cnt += 1))
-  fi
+		((err_cnt += 1))
+	fi
 
-  # check for dependencies that currently need to be set up manually
-  if [[ -z $(git config user.name) ]] ||
-    [[ -z $(git config user.email) ]]; then
-    echo ""
-    echo "################################################################"
-    echo ""
-    echo "ERROR:    Git user not found!"
-    echo "          Please setup global git user:"
-    echo "          'git config --global user.name [YOUR USER NAME]'"
-    echo "          'git config --global user.email [YOUR EMAIL]'"
-    echo ""
-    echo "################################################################"
-    echo ""
+	# check for dependencies that currently need to be set up manually
+	if [[ -z $(git config user.name) ]] ||
+		[[ -z $(git config user.email) ]]; then
+		echo ""
+		echo "################################################################"
+		echo ""
+		echo "ERROR:    Git user not found!"
+		echo "          Please setup global git user:"
+		echo "          'git config --global user.name [YOUR USER NAME]'"
+		echo "          'git config --global user.email [YOUR EMAIL]'"
+		echo ""
+		echo "################################################################"
+		echo ""
 
-    ((err_cnt += 1))
-  fi
+		((err_cnt += 1))
+	fi
 
-  return ${err_cnt}
+	return ${err_cnt}
 }
 disambiguate_host() {
-  ### relies on "notebook" and "lab" being present in url ###
+	### relies on "notebook" and "lab" being present in url ###
 
-  # check if hosts are already in use
-  hname=$1
-  instances=""
-  if [ -n "$JUPYTER_CONTAINER" ]; then
-    hosts=$(echo "$JUPYTER_CONTAINER" | xargs docker inspect -f '                
+	# check if hosts are already in use
+	hname=$1
+	instances=""
+	if [ -n "$JUPYTER_CONTAINER" ]; then
+		hosts=$(echo "$JUPYTER_CONTAINER" | xargs docker inspect -f '                
 		{{range .Config.Env }}
                         {{with $line := (split . "=")}}
                                 {{if eq (index . 0) "VIRTUAL_HOST"}}
@@ -184,63 +184,63 @@ disambiguate_host() {
                         {{end}}
                 {{end}}
 		')
-    # instances from same user with same name
-    # cat is needed to prevent exit on negative result
-    # note that expected format is hardcoded here
-    hname_front=$(echo "$hname" | sed -E "s/(^[A-Za-z]+\-[A-Za-z]+).*/\1/" | cat)
-    instances=$(echo "$hosts" | grep "$hname_front")
-    # numbers alreaady occupied
-    numbers=$(echo "$instances" | sed -E "s/.*([0-9])\..*/\1/")
-  fi
-  # no running instance, no need to calculate number to append
-  if [ "$instances" = "" ]; then
-    echo "$hname"
-    return 0
-  fi
+		# instances from same user with same name
+		# cat is needed to prevent exit on negative result
+		# note that expected format is hardcoded here
+		hname_front=$(echo "$hname" | sed -E "s/(^[A-Za-z]+\-[A-Za-z]+).*/\1/" | cat)
+		instances=$(echo "$hosts" | grep "$hname_front")
+		# numbers alreaady occupied
+		numbers=$(echo "$instances" | sed -E "s/.*([0-9])\..*/\1/")
+	fi
+	# no running instance, no need to calculate number to append
+	if [ "$instances" = "" ]; then
+		echo "$hname"
+		return 0
+	fi
 
-  n_max=10
-  changed=0
-  for i in $(seq 2 $n_max); do
-    found=$(echo "$numbers" | grep -c "$i" | cat)
-    #echo "i=$i: $found"
-    # number not in use, so can be used here
-    if [ "$found" -eq "0" ]; then
-      hname=$(echo "$hname" | sed -E "s/(\-lab|\-notebook)/\1\-${i}/")
-      changed=1
-      break
-    fi
-  done
+	n_max=10
+	changed=0
+	for i in $(seq 2 $n_max); do
+		found=$(echo "$numbers" | grep -c "$i" | cat)
+		#echo "i=$i: $found"
+		# number not in use, so can be used here
+		if [ "$found" -eq "0" ]; then
+			hname=$(echo "$hname" | sed -E "s/(\-lab|\-notebook)/\1\-${i}/")
+			changed=1
+			break
+		fi
+	done
 
-  # Error if something should have changed but didn't  due to maximum number reached.
-  if [ "$changed" -eq "0" ]; then
-    echo "ERROR: Too many open jupyter instances. Instances of same type may not exceed $n_max."
-    exit 1
-  fi
+	# Error if something should have changed but didn't  due to maximum number reached.
+	if [ "$changed" -eq "0" ]; then
+		echo "ERROR: Too many open jupyter instances. Instances of same type may not exceed $n_max."
+		exit 1
+	fi
 
-  echo "$hname"
+	echo "$hname"
 }
 
 # ---- show related functions
 show_docker_associated_images() {
-  echo "Docker Associated Images"
-  docker image list "${IMAGE_PREFIX}" |
-    while read -r line; do
-      printf '   %s\n' "$line"
-    done
+	echo "Docker Associated Images"
+	docker image list "${IMAGE_PREFIX}" |
+		while read -r line; do
+			printf '   %s\n' "$line"
+		done
 }
 show_jupyter_status() {
-  echo "Jupyter status:"
-  if [ -n "$JUPYTER_CONTAINER" ]; then
-    # we use go templates to build the desired output
-    # numbers below are arbitrary max-width borders used to align columns
-    jupyter_sourcepaths=$(echo "$JUPYTER_CONTAINER" | xargs docker container inspect -f '	
+	echo "Jupyter status:"
+	if [ -n "$JUPYTER_CONTAINER" ]; then
+		# we use go templates to build the desired output
+		# numbers below are arbitrary max-width borders used to align columns
+		jupyter_sourcepaths=$(echo "$JUPYTER_CONTAINER" | xargs docker container inspect -f '	
 		{{range .Mounts}}
 			{{if eq .Destination "/app"}}
 				{{.Source}}
 			{{end}}
 		{{end}}
 		')
-    jupyter_urls=$(echo "$JUPYTER_CONTAINER" | xargs docker container inspect -f '	
+		jupyter_urls=$(echo "$JUPYTER_CONTAINER" | xargs docker container inspect -f '	
 		{{range .Config.Env }}
 			{{with $line := (split . "=")}}
 				{{if eq (index . 0) "VIRTUAL_HOST"}}
@@ -249,7 +249,7 @@ show_jupyter_status() {
 			{{end}}
 		{{end}}
 		')
-    jupyter_cudas=$(echo "$JUPYTER_CONTAINER" | xargs docker container inspect -f '	
+		jupyter_cudas=$(echo "$JUPYTER_CONTAINER" | xargs docker container inspect -f '	
 		{{ $found := "False" }}
 		{{range .Config.Env}}	
 			{{with $line := (split . "=")}}
@@ -264,55 +264,55 @@ show_jupyter_status() {
 		{{end}}
 		')
 
-    jupyter_tokens=""
-    for cont in $JUPYTER_CONTAINER; do
-      jupyter_token=$(docker exec $cont jupyter server list 2>/dev/null | sed -rn 's/(https?:\/\/).*token=([a-z0-9]+)\b.*/\2/p')
-      if [ -z "$jupyter_token" ]; then
-        jupyter_token="None"
-      fi
-      jupyter_tokens="$jupyter_tokens $jupyter_token"
-    done
+		jupyter_tokens=""
+		for cont in $JUPYTER_CONTAINER; do
+			jupyter_token=$(docker exec $cont jupyter server list 2>/dev/null | sed -rn 's/(https?:\/\/).*token=([a-z0-9]+)\b.*/\2/p')
+			if [ -z "$jupyter_token" ]; then
+				jupyter_token="None"
+			fi
+			jupyter_tokens="$jupyter_tokens $jupyter_token"
+		done
 
-    # convert to arrays to be able to index lists
-    jupyter_sourcepaths=($(echo $jupyter_sourcepaths))
-    jupyter_urls=($(echo $jupyter_urls))
-    jupyter_cudas=($(echo $jupyter_cudas))
-    jupyter_tokens=($(echo $jupyter_tokens))
-    otheruserjups=0
-    # print aligned
-    printf "   %*s %*s %*s %*s\n" -50 "JUPYTER URL" -50 "JUPYTER WORKSPACE" -50 "RUNNING CUDA" -50 "TOKEN"
+		# convert to arrays to be able to index lists
+		jupyter_sourcepaths=($(echo $jupyter_sourcepaths))
+		jupyter_urls=($(echo $jupyter_urls))
+		jupyter_cudas=($(echo $jupyter_cudas))
+		jupyter_tokens=($(echo $jupyter_tokens))
+		otheruserjups=0
+		# print aligned
+		printf "   %*s %*s %*s %*s\n" -50 "JUPYTER URL" -50 "JUPYTER WORKSPACE" -50 "RUNNING CUDA" -50 "TOKEN"
 
-    for ((i = 0; i < ${#jupyter_urls[@]}; ++i)); do
-      # check user by looking if url _starts_ with user
-      if [[ ${jupyter_urls[$i]} != "$USER"* ]]; then
-        otheruserjups=$((otheruserjups + 1))
-      else
-        # numbers are for aligned formatting (may be needed to be improved in future)
-        printf "   %*s %*s %*s %*s\n" -50 "https://${jupyter_urls[$i]}" -50 "${jupyter_sourcepaths[$i]}" -50 "CUDA ${jupyter_cudas[$i]}" -50 "${jupyter_tokens[$i]}"
-      fi
-    done
-    echo ""
-    echo "   There are $otheruserjups instances running from other users."
-  else
-    echo "   No jupyter server running"
-  fi
+		for ((i = 0; i < ${#jupyter_urls[@]}; ++i)); do
+			# check user by looking if url _starts_ with user
+			if [[ ${jupyter_urls[$i]} != "$USER"* ]]; then
+				otheruserjups=$((otheruserjups + 1))
+			else
+				# numbers are for aligned formatting (may be needed to be improved in future)
+				printf "   %*s %*s %*s %*s\n" -50 "https://${jupyter_urls[$i]}" -50 "${jupyter_sourcepaths[$i]}" -50 "CUDA ${jupyter_cudas[$i]}" -50 "${jupyter_tokens[$i]}"
+			fi
+		done
+		echo ""
+		echo "   There are $otheruserjups instances running from other users."
+	else
+		echo "   No jupyter server running"
+	fi
 }
 show_mlflow_status() {
-  echo "MLflow status:"
+	echo "MLflow status:"
 
-  if [ $(docker ps -qf name=${USER}-mlflow-server) ]; then
-    echo "   https://${MLFLOW_VIRTUAL_HOST}"
-  else
-    echo "   MLFLOW inactive"
-  fi
+	if [ $(docker ps -qf name=${USER}-mlflow-server) ]; then
+		echo "   https://${MLFLOW_VIRTUAL_HOST}"
+	else
+		echo "   MLFLOW inactive"
+	fi
 
 }
 show_status() {
-  show_docker_associated_images
-  echo ""
-  show_mlflow_status
-  echo ""
-  show_jupyter_status
+	show_docker_associated_images
+	echo ""
+	show_mlflow_status
+	echo ""
+	show_jupyter_status
 }
 
 # Read configuration file #####################################################
@@ -322,14 +322,14 @@ VERSION=$(cat /etc/ai-cli/version)
 
 # Check if paths correctly configured
 for p in DOCKER_COMPOSE_PATH HTPASSWD_PATH MLFLOW_DATA; do
-  [[ -z ${!p} ]] && {
-    echo "ERROR: ${p} is undefined! Check your configuration in $CONFIG_PATH"
-    exit 1
-  }
-  [[ ! -e ${!p} ]] && {
-    echo "ERROR: ${p} (${!p}) dos not exists! Check your configuration in $CONFIG_PATH"
-    exit 1
-  }
+	[[ -z ${!p} ]] && {
+		echo "ERROR: ${p} is undefined! Check your configuration in $CONFIG_PATH"
+		exit 1
+	}
+	[[ ! -e ${!p} ]] && {
+		echo "ERROR: ${p} (${!p}) dos not exists! Check your configuration in $CONFIG_PATH"
+		exit 1
+	}
 done
 
 # CHECK INIT ###################################################################
@@ -337,7 +337,7 @@ done
 # The init method fixes issues that can be solved automatically. This is necessary
 # setup user workspace before first use.
 [ "$1" = init ] || check_init || {
-  exit $v
+	exit $v
 }
 
 # Variable definitions ########################################################
@@ -374,75 +374,75 @@ CONDA_DIR="/home/${USER}/.conda/envs/"
 #fi
 # CLI Arguments ################################################################
 while getopts :he:g:n:c:v:i:t:r: flag; do
-  case "${flag}" in
-    v) # Specify additional docker @VOLUME@s
-      # -v is only valid on certain commands
-      valid_commands=("bash run lab notebook runner")
-      valid_v=false
-      for token in "$@"; do
-        if [[ " ${valid_commands[*]} " =~ " ${token} " ]]; then
-          valid_v=true
-        fi
-      done
-      if [[ $valid_v == false ]]; then
-        echo "ERROR: -v used in wrong context. Only valid when command is in list: ${valid_commands}."
-        exit 1
-      fi
+	case "${flag}" in
+	v) # Specify additional docker @VOLUME@s
+		# -v is only valid on certain commands
+		valid_commands=("bash run lab notebook runner")
+		valid_v=false
+		for token in "$@"; do
+			if [[ " ${valid_commands[*]} " =~ " ${token} " ]]; then
+				valid_v=true
+			fi
+		done
+		if [[ $valid_v == false ]]; then
+			echo "ERROR: -v used in wrong context. Only valid when command is in list: ${valid_commands}."
+			exit 1
+		fi
 
-      RUN_VOLUMES+=($OPTARG)
-      ;;
-    e) # Specify environment @FILE
-      MLFLOW_ENV_FILE=${OPTARG} && source "$MLFLOW_ENV_FILE" ;;
-    g) # Enable gpu support. Set specific @GPUS, e.g. 0,1 for gpu 0 and 1.
-      GPUS=${OPTARG}
-      RUNTIME="nvidia"
-      ;;
-    n) # Specify experiment @NAME
-      MLFLOW_EXPERIMENT_NAME=${OPTARG}
-      ;;
-    c) # Build with cuda support. Specify @CUDA version to use. Tags image with 'c<VERSION>' by default.
-      valid_c=true
-      invalid_cuda_tokens=("reset-password" "version" "status" "restart-mlflow" "stop-mlflow" "start-mlflow" "init")
-      argument_tokens=("$@")
-      for token in ${argument_tokens[@]}; do
-        # test if any token is invalid (https://stackoverflow.com/a/41395983)
-        if [[ " ${invalid_cuda_tokens[*]} " == *"$token"* ]]; then
-          valid_c=false
-        fi
-      done
-      if [[ $valid_c == false ]]; then
-        echo "ERROR: -c used in wrong context. Not valid with $invalid_cuda_tokens."
-        exit 1
-      fi
-      echo "INFO: setting cuda version to $OPTARG"
-      CUDA_VERSION=${OPTARG}
-      IMAGE_TAG=c"$CUDA_VERSION"
+		RUN_VOLUMES+=($OPTARG)
+		;;
+	e) # Specify environment @FILE
+		MLFLOW_ENV_FILE=${OPTARG} && source "$MLFLOW_ENV_FILE" ;;
+	g) # Enable gpu support. Set specific @GPUS, e.g. 0,1 for gpu 0 and 1.
+		GPUS=${OPTARG}
+		RUNTIME="nvidia"
+		;;
+	n) # Specify experiment @NAME
+		MLFLOW_EXPERIMENT_NAME=${OPTARG}
+		;;
+	c) # Build with cuda support. Specify @CUDA version to use. Tags image with 'c<VERSION>' by default.
+		valid_c=true
+		invalid_cuda_tokens=("reset-password" "version" "status" "restart-mlflow" "stop-mlflow" "start-mlflow" "init")
+		argument_tokens=("$@")
+		for token in ${argument_tokens[@]}; do
+			# test if any token is invalid (https://stackoverflow.com/a/41395983)
+			if [[ " ${invalid_cuda_tokens[*]} " == *"$token"* ]]; then
+				valid_c=false
+			fi
+		done
+		if [[ $valid_c == false ]]; then
+			echo "ERROR: -c used in wrong context. Not valid with $invalid_cuda_tokens."
+			exit 1
+		fi
+		echo "INFO: setting cuda version to $OPTARG"
+		CUDA_VERSION=${OPTARG}
+		IMAGE_TAG=c"$CUDA_VERSION"
 
-      ;;
-    i) # Specify docker @IMAGE to be used.
-      valid_i=true
-      for token in "$@"; do
-        if [[ $token == "build" ]]; then
-          valid_i=false
-        fi
-      done
-      if [[ $valid_i == false ]]; then
-        echo "ERROR: -i used in wrong context. Not valid when you call 'build' use -t or -c instead."
-        exit 1
-      fi
-      IMAGE_NAME="${OPTARG}"
-      ;;
-    *) show_help && exit 0 ;;
-  esac
+		;;
+	i) # Specify docker @IMAGE to be used.
+		valid_i=true
+		for token in "$@"; do
+			if [[ $token == "build" ]]; then
+				valid_i=false
+			fi
+		done
+		if [[ $valid_i == false ]]; then
+			echo "ERROR: -i used in wrong context. Not valid when you call 'build' use -t or -c instead."
+			exit 1
+		fi
+		IMAGE_NAME="${OPTARG}"
+		;;
+	*) show_help && exit 0 ;;
+	esac
 done
 shift $((OPTIND - 1)) # to skip option arguments when evaulating command
 
 # CLI args for docker-compose run
 for v in ${RUN_VOLUMES[@]}; do
-  RUN_ARGS+=" -v $v"
+	RUN_ARGS+=" -v $v"
 done
 if [[ -n $MLFLOW_EXPERIMENT_NAME ]]; then
-  RUN_ARGS+=" -e MLFLOW_EXPERIMENT_NAME=$MLFLOW_EXPERIMENT_NAME"
+	RUN_ARGS+=" -e MLFLOW_EXPERIMENT_NAME=$MLFLOW_EXPERIMENT_NAME"
 fi
 
 # Exports #####################################################################
@@ -470,171 +470,171 @@ echo "INFO: using runtime $RUNTIME"
 [ $GPUS ] && echo "INFO: using gpus '$GPUS'"
 # Run command ##################################################################
 if [[ $# == 0 ]]; then
-  show_help && exit 1
+	show_help && exit 1
 else
-  CMD=$1
-  shift
+	CMD=$1
+	shift
 fi
 case ${CMD} in
-  init) # initialize this script for your user
-    init ;;
-  start-mlflow) # start mlflow server
-    basic_auth "$MLFLOW_VIRTUAL_HOST"
-    dc server up -d
-    ;;
-  stop-mlflow) # stop mlflow server
-    dc server down ;;
-  restart-mlflow) # restart mlflow server
-    dc server down
-    ai-cli build-server
-    dc server up -d
-    ;;
-  status) # show status of your environment
-    show_status ;;
-  build) # build image from dockerfile
-    if [[ -z ${CUDA_VERSION} ]]; then
-      echo "INFO: Building without cuda"
-      echo "INFO: Building workspace"
-      docker build \
-        --pull \
-        -t $(build_image_name $IMAGE_PREFIX workspace) \
-        --build-arg=ARG_NB_USER="$USER" \
-        --build-arg=ARG_NB_UID="$NB_UID" \
-        --build-arg=ARG_NB_GID="$NB_GID" \
-        --build-arg=ARG_HOME="/home/${USER}" \
-        --build-arg=BASE_WORKSPACE_IMAGE_TAG="$BASE_WORKSPACE_IMAGE_TAG" \
-        --build-arg=PYTHON_VERSION="$PYTHON_VERSION" \
-        --build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
-        $DOCKER_COMPOSE_PATH/workspace-base/
+init) # initialize this script for your user
+	init ;;
+start-mlflow) # start mlflow server
+	basic_auth "$MLFLOW_VIRTUAL_HOST"
+	dc server up -d
+	;;
+stop-mlflow) # stop mlflow server
+	dc server down ;;
+restart-mlflow) # restart mlflow server
+	dc server down
+	ai-cli build-server
+	dc server up -d
+	;;
+status) # show status of your environment
+	show_status ;;
+build) # build image from dockerfile
+	if [[ -z ${CUDA_VERSION} ]]; then
+		echo "INFO: Building without cuda"
+		echo "INFO: Building workspace"
+		docker build \
+			--pull \
+			-t $(build_image_name $IMAGE_PREFIX workspace) \
+			--build-arg=ARG_NB_USER="$USER" \
+			--build-arg=ARG_NB_UID="$NB_UID" \
+			--build-arg=ARG_NB_GID="$NB_GID" \
+			--build-arg=ARG_HOME="/home/${USER}" \
+			--build-arg=BASE_WORKSPACE_IMAGE_TAG="$BASE_WORKSPACE_IMAGE_TAG" \
+			--build-arg=PYTHON_VERSION="$PYTHON_VERSION" \
+			--build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
+			$DOCKER_COMPOSE_PATH/workspace-base/
 
-      echo "INFO: Building runner"
-      docker build \
-        -t $(build_image_name $IMAGE_PREFIX runner) \
-        --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
-        "$DOCKER_COMPOSE_PATH"/workspace-dvc/
+		echo "INFO: Building runner"
+		docker build \
+			-t $(build_image_name $IMAGE_PREFIX runner) \
+			--build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
+			"$DOCKER_COMPOSE_PATH"/workspace-dvc/
 
-    else
-      echo "INFO: Building with cuda $CUDA_VERSION"
-      echo "INFO: Building workspace"
-      # version formats vary so we need to split into major and minor version
-      CMAJ=${CUDA_VERSION%\.*}
-      CMIN=${CUDA_VERSION#*\.}
-      docker build \
-        -t $(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
-        --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
-        --build-arg=CMAJ="$CMAJ" \
-        --build-arg=CMIN="$CMIN" \
-        $DOCKER_COMPOSE_PATH/workspace-cuda/
+	else
+		echo "INFO: Building with cuda $CUDA_VERSION"
+		echo "INFO: Building workspace"
+		# version formats vary so we need to split into major and minor version
+		CMAJ=${CUDA_VERSION%\.*}
+		CMIN=${CUDA_VERSION#*\.}
+		docker build \
+			-t $(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
+			--build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
+			--build-arg=CMAJ="$CMAJ" \
+			--build-arg=CMIN="$CMIN" \
+			$DOCKER_COMPOSE_PATH/workspace-cuda/
 
-      docker build \
-        -t $(build_image_name $IMAGE_PREFIX runner $CUDA_VERSION) \
-        --build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
-        "$DOCKER_COMPOSE_PATH"/workspace-dvc/
-    fi
+		docker build \
+			-t $(build_image_name $IMAGE_PREFIX runner $CUDA_VERSION) \
+			--build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
+			"$DOCKER_COMPOSE_PATH"/workspace-dvc/
+	fi
 
-    _TAG=$(build_image_name $IMAGE_PREFIX mlflow)
-    echo "INFO: Building mlflow server ${_TAG}"
-    docker build \
-      --pull \
-      -t $(build_image_name $IMAGE_PREFIX mlflow) \
-      --build-arg=PYTHON_VERSION=$PYTHON_VERSION \
-      --build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
-      $DOCKER_COMPOSE_PATH/mlflow
-    ;;
-  bash) # start bash shell inside container
-    export MLFLOW_LOCAL_PROJECT
-    docker_run workspace $(select_image workspace) bash
-    ;;
-  notebook) # start jupyter notebook server
-    JUPYTER_VIRTUAL_HOST=$(disambiguate_host $NOTEBOOK_VIRTUAL_HOST)
-    export JUPYTER_VIRTUAL_HOST
-    export MLFLOW_LOCAL_PROJECT
-    echo "INFO: Running notebook server in: $MLFLOW_LOCAL_PROJECT"
-    echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-    docker_run jupyter $(select_image workspace) $JUPYTER_CMD
-    ;;
-  lab) # start jupyter lab server
-    JUPYTER_VIRTUAL_HOST=$(disambiguate_host $LAB_VIRTUAL_HOST)
-    export JUPYTER_VIRTUAL_HOST
-    export MLFLOW_LOCAL_PROJECT
-    echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
-    echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-    docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD
-    ;;
-  runner) # start cml runner for repo
-    args=("$@")
-    if [[ ${#args[@]} -ne 2 ]]; then
-      echo "please provide URL and TOKEN"
-      exit 1
-    fi
-    TOKEN_ARG="${args[-1]}"
-    URL_ARG="${args[-2]}"
-    echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'. GPUS: ${GPUS}"
-    GPUOPT=""
-    if [[ -n $GPUS ]]; then
-      GPUOPT="--gpus ${GPUS}"
-    fi
+	_TAG=$(build_image_name $IMAGE_PREFIX mlflow)
+	echo "INFO: Building mlflow server ${_TAG}"
+	docker build \
+		--pull \
+		-t $(build_image_name $IMAGE_PREFIX mlflow) \
+		--build-arg=PYTHON_VERSION=$PYTHON_VERSION \
+		--build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
+		$DOCKER_COMPOSE_PATH/mlflow
+	;;
+bash) # start bash shell inside container
+	export MLFLOW_LOCAL_PROJECT
+	docker_run workspace $(select_image workspace) bash
+	;;
+notebook) # start jupyter notebook server
+	JUPYTER_VIRTUAL_HOST=$(disambiguate_host $NOTEBOOK_VIRTUAL_HOST)
+	export JUPYTER_VIRTUAL_HOST
+	export MLFLOW_LOCAL_PROJECT
+	echo "INFO: Running notebook server in: $MLFLOW_LOCAL_PROJECT"
+	echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
+	docker_run jupyter $(select_image workspace) $JUPYTER_CMD
+	;;
+lab) # start jupyter lab server
+	JUPYTER_VIRTUAL_HOST=$(disambiguate_host $LAB_VIRTUAL_HOST)
+	export JUPYTER_VIRTUAL_HOST
+	export MLFLOW_LOCAL_PROJECT
+	echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
+	echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
+	docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD
+	;;
+runner) # start cml runner for repo
+	args=("$@")
+	if [[ ${#args[@]} -ne 2 ]]; then
+		echo "please provide URL and TOKEN"
+		exit 1
+	fi
+	TOKEN_ARG="${args[-1]}"
+	URL_ARG="${args[-2]}"
+	echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'. GPUS: ${GPUS}"
+	GPUOPT=""
+	if [[ -n $GPUS ]]; then
+		GPUOPT="--gpus ${GPUS}"
+	fi
 
-    RUN_ARGS+=" -e REPO_TOKEN=$TOKEN_ARG" # required for runner to comment
-    #RUN_ARGS+=" --user jovyan"
-    docker_run runner $(select_image runner) cml runner launch \
-      --repo="$URL_ARG" \
-      --token="$TOKEN_ARG" \
-      --driver="gitlab" \
-      --labels="local,runner,ai-cli" \
-      --idle-timeout -1
+	RUN_ARGS+=" -e REPO_TOKEN=$TOKEN_ARG" # required for runner to comment
+	#RUN_ARGS+=" --user jovyan"
+	docker_run runner $(select_image runner) cml runner launch \
+		--repo="$URL_ARG" \
+		--token="$TOKEN_ARG" \
+		--driver="gitlab" \
+		--labels="local,runner,ai-cli" \
+		--idle-timeout -1
 
-    ;;
-  exec) # execute @PROGRAMM inside container
-    if [[ $# == 0 ]]; then
-      echo "ERROR: Please provide a program name as argument"
-      show_help
-      exit 1
-    fi
-    export MLFLOW_LOCAL_PROJECT
-    docker_run workspace $(select_image workspace) $*
-    ;;
-  run) # run MLProject from @PATH inside container
-    if [[ $# == 0 ]]; then
-      echo "ERROR: Please provide a path as argument"
-      show_help
-      exit 1
-    fi
+	;;
+exec) # execute @PROGRAMM inside container
+	if [[ $# == 0 ]]; then
+		echo "ERROR: Please provide a program name as argument"
+		show_help
+		exit 1
+	fi
+	export MLFLOW_LOCAL_PROJECT
+	docker_run workspace $(select_image workspace) $*
+	;;
+run) # run MLProject from @PATH inside container
+	if [[ $# == 0 ]]; then
+		echo "ERROR: Please provide a path as argument"
+		show_help
+		exit 1
+	fi
 
-    echo "INFO: MLflow data path: $MLFLOW_DATA"
-    if [[ -n $MLFLOW_EXPERIMENT_NAME ]]; then
-      echo "INFO: MLflow experiment name: $MLFLOW_EXPERIMENT_NAME"
-    fi
-    export MLFLOW_LOCAL_PROJECT
-    echo "INFO: Running MLProject from $MLFLOW_LOCAL_PROJECT"
-    echo "INFO: Executed Command:  mlflow run $*"
-    docker_run workspace $(select_image workspace) mlflow run $*
-    ;;
-  run-from-git) # run MLProject from git repo at @URI inside container
-    if [[ $# != 0 && -z $MLFLOW_GIT_PROJECT ]]; then
-      MLFLOW_GIT_PROJECT=$1
-    elif [[ $# == 0 && -z $MLFLOW_GIT_PROJECT ]]; then
-      echo "ERROR: No git repo specified"
-      show_help
-      exit 1
-    fi
-    echo "INFO: Running MLProject from $MLFLOW_GIT_PROJECT"
-    docker_run workspace $(select_image workspace) mlflow run $MLFLOW_GIT_PROJECT
-    ;;
-  info) # show basic paths and env variables
-    echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
-    echo "INFO: DOCKER_USER=${DOCKER_USER}"
-    echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
-    echo "INFO: URLNAME=${URLNAME}"
-    echo "INFO: EXTENSION_PATH=${EXTENSION_PATH}"
-    echo "INFO: VERSION=${VERSION}"
-    ;;
-  version) # show git commit hash this script is installed with
-    echo "$VERSION"
-    ;;
-  reset-password) # Reset Password for mlflow you will setup a new one at next server start
-    rm "${HTPASSWD_PATH}/${MLFLOW_VIRTUAL_HOST}"
-    echo "successfully reset password"
-    ;;
-  *) show_help && exit 1 ;;
+	echo "INFO: MLflow data path: $MLFLOW_DATA"
+	if [[ -n $MLFLOW_EXPERIMENT_NAME ]]; then
+		echo "INFO: MLflow experiment name: $MLFLOW_EXPERIMENT_NAME"
+	fi
+	export MLFLOW_LOCAL_PROJECT
+	echo "INFO: Running MLProject from $MLFLOW_LOCAL_PROJECT"
+	echo "INFO: Executed Command:  mlflow run $*"
+	docker_run workspace $(select_image workspace) mlflow run $*
+	;;
+run-from-git) # run MLProject from git repo at @URI inside container
+	if [[ $# != 0 && -z $MLFLOW_GIT_PROJECT ]]; then
+		MLFLOW_GIT_PROJECT=$1
+	elif [[ $# == 0 && -z $MLFLOW_GIT_PROJECT ]]; then
+		echo "ERROR: No git repo specified"
+		show_help
+		exit 1
+	fi
+	echo "INFO: Running MLProject from $MLFLOW_GIT_PROJECT"
+	docker_run workspace $(select_image workspace) mlflow run $MLFLOW_GIT_PROJECT
+	;;
+info) # show basic paths and env variables
+	echo "INFO: MLFLOW_VERSION=${MLFLOW_VERSION}"
+	echo "INFO: DOCKER_USER=${DOCKER_USER}"
+	echo "INFO: MLFLOW_DATA=${MLFLOW_DATA}"
+	echo "INFO: URLNAME=${URLNAME}"
+	echo "INFO: EXTENSION_PATH=${EXTENSION_PATH}"
+	echo "INFO: VERSION=${VERSION}"
+	;;
+version) # show git commit hash this script is installed with
+	echo "$VERSION"
+	;;
+reset-password) # Reset Password for mlflow you will setup a new one at next server start
+	rm "${HTPASSWD_PATH}/${MLFLOW_VIRTUAL_HOST}"
+	echo "successfully reset password"
+	;;
+*) show_help && exit 1 ;;
 esac
