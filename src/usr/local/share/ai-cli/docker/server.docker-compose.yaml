@@ -32,6 +32,7 @@ services:
       - file:///mlruns
     volumes:
       - ${MLFLOW_DATA}:/mlruns
+      - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
     environment:
       VIRTUAL_HOST: ${USER}-mlflow.${URLNAME}
       VIRTUAL_PORT: ${MLFLOWPORT}

@@ -31,6 +31,7 @@ services:
       - ${EXTENSION_PATH}:/opt/conda/share/jupyter/lab/extensions
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
+      - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
     environment:
      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
      CONDA_ENVS_PATH: ${CONDA_DIR}

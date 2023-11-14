@@ -11,7 +11,9 @@ run_hooks () {
 	echo "INFO: done running hooks in ${1}"
 }
 
+run_hooks /etc/ai-cli/hooks/before-cmd.d
 run_hooks $HOME/.local/hooks/before-cmd.d
 echo "INFO: executing $*"
 exec $*
 run_hooks $HOME/.local/hooks/after-cmd.d
+run_hooks /etc/ai-cli/hooks/after-cmd.d

@@ -267,6 +267,8 @@ show_jupyter_status() {
     jupyter_tokens=""
     for cont in $JUPYTER_CONTAINER; do
       jupyter_token=$(docker exec $cont jupyter server list 2>/dev/null | sed -rn 's/(https?:\/\/).*token=([a-z0-9]+)\b.*/\2/p')
+      #TODO: why do urls show same token? there must be a connection between the docker containers that makes them update
+      # echo $cont $jupyter_token
       if [ -z "$jupyter_token" ]; then
         jupyter_token="None"
       fi
@@ -350,7 +352,8 @@ GIT_USER_NAME="'$(git config --get user.name)'" # git used in workspace-base/ent
 GIT_USER_EMAIL="$(git config --get user.email)"
 MLFLOW_VIRTUAL_HOST=${USER}-mlflow.$URLNAME
 JUPYTER_CMD="jupyter notebook --notebook-dir=/app --ip 0.0.0.0 --no-browser"
-JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser --collaborative"
+# JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser --collaborative" #NOTE: --collaborative may cause freeze related to ydoc extension watching files
+JUPYTER_LAB_CMD="jupyter lab --notebook-dir=/app --ip 0.0.0.0 --no-browser"
 JUPYTER_CONTAINER=$(docker ps -qf name=".*jupyter.*")
 NOTEBOOK_VIRTUAL_HOST=${USER}-notebook.$URLNAME
 LAB_VIRTUAL_HOST=${USER}-lab.$URLNAME
@@ -558,6 +561,9 @@ case ${CMD} in
     export MLFLOW_LOCAL_PROJECT
     echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
     echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
+
+    #RUN_ARGS+=" -d "
+    #RUN_ARGS+=" -p 8889:8888 " #TODO: why not found?
     docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD
     ;;
   runner) # start cml runner for repo
