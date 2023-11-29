@@ -1,11 +1,13 @@
+ADDITIONAL_GROUP=1007
 BASE_WORKSPACE_IMAGE_TAG=ubuntu-22.04
 DOCKER_COMPOSE_PATH=/usr/local/share/ai-cli/docker/
+DVC_DATA=/mnt/data/dvc/
 EXTENSION_PATH="${HOME}/.local/share/ai-cli/extensions"
 HOME_PATH="${HOME}/.local/share/ai-cli/home"
 HTPASSWD_PATH=/var/local/ai-cli/htpasswd
 JUPYTERPORT=8888
 MLFLOWPORT=5000
 MLFLOW_DATA=/mnt/data/$USER/mlflow
-MLFLOW_VERSION="1.28.0"
+MLFLOW_VERSION=2.8
 PYTHON_VERSION=3.10
-URLNAME=localhost
+URLNAME=ai4grids.ei.htwg-konstanz.de
