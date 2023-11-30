@@ -13,4 +13,4 @@ if [ "$currenthash" != "$targethash" ]; then
 	echo "recreated environment"
 fi
 
-mamba activate ai-cli
+mamba activate $env_name
