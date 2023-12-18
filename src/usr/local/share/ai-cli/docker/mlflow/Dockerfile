@@ -14,15 +14,15 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-ARG PYTHON_VERSION
-FROM python:$PYTHON_VERSION-slim
+ARG PYTHON_STEM
+FROM python:$PYTHON_STEM-slim
 ENV DEBIAN_FRONTEND=noninteractive \
     CONDA_DIR=/opt/conda \
     SHELL=/bin/bash \
     PATH="${CONDA_DIR}/bin:${PATH}"
 
 ARG MLFLOW_VERSION
-RUN pip install mlflow==$MLFLOW_VERSION.*
+RUN pip install mlflow==$MLFLOW_VERSION
 
 WORKDIR /app
 

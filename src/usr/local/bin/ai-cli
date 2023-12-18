@@ -492,6 +492,9 @@ restart-mlflow) # restart mlflow server
 status) # show status of your environment
 	show_status ;;
 build) # build image from dockerfile
+
+	PYTHON_STEM=${PYTHON_VERSION%\.*}
+	MLFLOW_STEM=${MLFLOW_VERSION%\.*}
 	if [[ -z ${CUDA_VERSION} ]]; then
 		echo "INFO: Building without cuda"
 		echo "INFO: Building workspace"
@@ -537,7 +540,7 @@ build) # build image from dockerfile
 	docker build \
 		--pull \
 		-t $(build_image_name $IMAGE_PREFIX mlflow) \
-		--build-arg=PYTHON_VERSION=$PYTHON_VERSION \
+		--build-arg=PYTHON_STEM=$PYTHON_STEM \
 		--build-arg=MLFLOW_VERSION=$MLFLOW_VERSION \
 		$DOCKER_COMPOSE_PATH/mlflow
 	;;

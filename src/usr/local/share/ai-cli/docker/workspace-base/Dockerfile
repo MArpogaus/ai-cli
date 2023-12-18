@@ -31,9 +31,9 @@ ENV NB_USER=${ARG_NB_USER} \
 
 RUN set -x && \
     rm ${CONDA_DIR}/conda-meta/pinned && \
-    mamba install --quiet --yes \
-    python==${PYTHON_VERSION}.* \
-    mlflow==${MLFLOW_VERSION}.* \
+    mamba install --yes \
+    python>="${PYTHON_VERSION}" \
+    mlflow>="${MLFLOW_VERSION}" \
     'nb_conda_kernels' && \
     mamba list python | grep '^python ' | tr -s ' ' | cut -d ' ' -f 1,2 >> "${CONDA_DIR}/conda-meta/pinned" && \
     mamba clean --all -f -y
