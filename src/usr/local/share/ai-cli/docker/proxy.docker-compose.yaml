@@ -1,0 +1,64 @@
+ERTS_PATH:-./certs}:/etc/nginx/certs:ro
+#    Copyright (C) 2022  Marcel Arpogaus, Julian Jandeleit
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+version: '3'
+services:
+  
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - conf.d:/etc/nginx/conf.d/
+      - ./conf.d/custom.conf:/etc/nginx/conf.d/custom.conf:ro
+      - ${CERTS_PATH:-./certs}:/etc/nginx/certs:ro 
+      - ${HTPASSWD_PATH:-./htpasswd}:/etc/nginx/htpasswd:ro
+  
+  default_host:
+    image: nginx:alpine
+    container_name: default_host
+    restart: always
+    ports:
+      - 9999:80
+    environment:
+      VIRTUAL_HOST: ${DEFAULT_HOST}
+      VIRTUAL_PORT: "9999"
+      CERT_NAME: shared
+    networks:
+      - proxy_net
+
+  dockergen:
+    image: jwilder/docker-gen
+    container_name: docker_gen
+    restart: always
+    command: -notify-sighup nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+    volumes_from:
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
+    environment:
+      DEFAULT_HOST: ${DEFAULT_HOST}
+      RESOLVERS: 127.0.0.11
+
+volumes:
+  conf.d:
+
+networks:
+  proxy_net:
+      name: proxy_net
