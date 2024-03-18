@@ -516,11 +516,10 @@ restart-mlflow) # restart mlflow server
 	dc server up -d
 	;;
 start-proxy)
-	echo $HTPASSWD_PATH $CERTS_PATH $DEFAULT_HOST
-	dc proxy_demo up -d --force-recreate
+	dc proxy up -d --force-recreate
 	;;
 stop-proxy)
-	dc proxy_demo down
+	dc proxy down
 	;;
 status) # show status of your environment
 	show_status ;;
