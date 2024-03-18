@@ -307,12 +307,35 @@ show_mlflow_status() {
 	fi
 
 }
+show_proxy_status() {
+	status_nginx=$(docker container ps --filter "name=nginx" --filter "status=running" | tail -n+2)
+	status_gen=$(docker container ps --filter "name=docker_gen" --filter "status=running" | tail -n+2)
+	
+	echo "Proxy status:"
+	if [ "$status_nginx" ]; then
+		echo "  nginx      online"
+	else
+		echo "  nginx      offline"
+	fi
+
+	if [ "$status_gen" ]; then
+		echo "  docker_gen online"
+	else
+		echo "  docker_gen offline"
+	fi
+
+	if [ -z  "$status_nginx" ] || [ -z "$status_gen" ]; then
+		echo "WARNING: Services might not be available online, use \`ai-cli start-proxy\` to start them."
+	fi
+}
 show_status() {
 	show_docker_associated_images
 	echo ""
 	show_mlflow_status
 	echo ""
 	show_jupyter_status
+	echo ""
+	show_proxy_status
 }
 
 # Read configuration file #####################################################
@@ -464,6 +487,9 @@ export NB_GID
 export NB_UID
 export RUNTIME
 export URLNAME
+export HTPASSWD_PATH
+export CERTS_PATH
+export DEFAULT_HOST
 
 # show docker info ####################################################################
 echo "INFO: using runtime $RUNTIME"
@@ -488,6 +514,13 @@ restart-mlflow) # restart mlflow server
 	dc server down
 	ai-cli build-server
 	dc server up -d
+	;;
+start-proxy)
+	echo $HTPASSWD_PATH $CERTS_PATH $DEFAULT_HOST
+	dc proxy_demo up -d --force-recreate
+	;;
+stop-proxy)
+	dc proxy_demo down
 	;;
 status) # show status of your environment
 	show_status ;;

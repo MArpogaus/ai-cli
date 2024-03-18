@@ -21,35 +21,40 @@ Docker containers are used to manage the dependencies and isolate different proj
 
 ## Setup
 
-Use `sudo make install` to install ai-cli system-wide. Each user has to execute `ai-cli init` before their first usage.
+Use `sudo make install` to install ai-cli system-wide. Each user has to execute `ai-cli init` before their first usage. To reach services online, the reverse proxy needs to be started with `ai-cli start-proxy` once, globally.
 
-```bash
-make install
-make uninstall
-```
+### Step-By-Step Instructions
 
-When using `ai-cli`, the following dependencies are expected to be installed and running
+**Install**
+1. Install dependencies:  `sudo apt-get install git make dpkg apache2-utils`
+2. Install `docker-ce` from [docker website](https://docs.docker.com/engine/install/ubuntu/)
+3. Install `docker-compose v2` from [github](https://github.com/docker/compose/releases) (move the executable to `/usr/local/bin/docker-compose` for example)
+4. Install ai-cli: `git clone https://github.com/MArpogaus/ai-cli.git && cd ai-cli && sudo make install`
 
-- requires git which is set-up with user name and email!
-- requires running docker deamon
-- requires htpasswd (apache2-utils), folder must exist and have permissions of user
-- requires jupyter(-core) to be installed
+Note:
+`ai-cli` requires docker daemon to be running.
 
-The script checks if dependencies are correctly configured and notifies the user at the start of each execution if something is not correctly configured.
+**System-Wide Configuration**
 
-## Configuration
+Open `/etc/ai-cli/config` and edit 
+ - DVC_DATA
+ - MLFLOW_DATA (can contain ${USER} for user destinction)
+ - CERTS_PATH (should contain .pem, .crt .key files for ssl)
+ - URLNAME (can be left as localhost if desired)
+ - DEFAULT_HOST (can be left as error.localhost if desired)
+to reflect respective values of your system 
 
-You can set the url which is used as a base for MLflow and Jupyter access.
-The configuration file is located at `/etc/ai-cli/`
+Configure a first user like below and start reverse proxy: `ai-cli start-proxy`. _This needs to be repeated after reboot and must be invoked to reach exposed web services like jupyter._
 
-Uninstall target does _not_ touch some internal configurations.
-For a clean install
+**User Configuration**
 
-- htpasswd
-- docker network mlflow-bridge
-- docker server and workspace
+The following needs to be done for _every_ new user in order to use `ai-cli`.
 
-need to be cleared manually.
+1. Every user that should run ai-cli needs to be added to the `docker` group to not require root. You might need to log-in again or even restart for the change to apply.
+2. Every user needs to have a valid (global) git configuration (email and name) set.
+3. Execute `ai-cli init` for every new user to setup workspace and build user containers.
+
+`ai-cli` can now be used by the new user for example by starting a jupyter server with `ai-cli lab`. Make sure the reverse proxy is running as described above before trying to access jupyter.
 
 ## Usage
 
@@ -68,7 +73,6 @@ need to be cleared manually.
     -h                   Show help
 
 ### Commands
-
     init                 initialize this script for your user
     start-server         start mlflow server
     stop-server          stop mlflow server
