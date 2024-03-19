@@ -515,10 +515,10 @@ restart-mlflow) # restart mlflow server
 	ai-cli build-server
 	dc server up -d
 	;;
-start-proxy)
+start-proxy) # start nginx reverse proxy
 	dc proxy up -d --force-recreate
 	;;
-stop-proxy)
+stop-proxy) # stop nginx reverse proxy
 	dc proxy down
 	;;
 status) # show status of your environment
