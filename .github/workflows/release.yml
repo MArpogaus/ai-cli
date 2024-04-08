@@ -2,53 +2,55 @@ name: release
 on: 
   release:
     types: [published]
+
 jobs:
-   test-ci:
-      runs-on: ubuntu-latest
-      steps:
-       - name: Check out repository code
-         uses: actions/checkout@v2
-       - name: Install Prerequisites
-         run: sudo ./CI/install-prerequisites-manually.sh
-       - name: Install AI-CLI
-         run: |
-           sudo make install && source /etc/environment
-       - name: Prepare Tests
-         run: ./CI/setup-for-tests.sh
-       - name: Execute Tests      
-         id: exec-tests 
-         run: |
-           ./CI/run-tests.sh 1> >( ts > stdout.txt) 2> >( ts > stderr.txt )
-         continue-on-error: true
-       - name: show stdout
-         run: cat stdout.txt
-       - name: show stderr
-         run: cat stderr.txt
-       - name: check on failures
-         if : steps.exec-tests.outcome != 'success'
-         run: exit 1
-   publish:
-     runs-on: ubuntu-latest
-     needs: test-ci
-     if: ${{ needs.test-ci.result == 'success' }}
+  test-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install Prerequisites
+        run: sudo ./CI/install-prerequisites-manually.sh
+      - name: Install AI-CLI
+        run: | 
+          sudo make install && source /etc/environment
+      - name: Prepare Tests
+        run: ./CI/setup-for-tests.sh
+      - name: Execute Tests      
+        id: exec-tests 
+        run: |
+          ./CI/run-tests.sh 1> >( ts > stdout.txt) 2> >( ts > stderr.txt )
+        continue-on-error: true
+      - name: show stdout
+        run: cat stdout.txt
+      - name: show stderr
+        run: cat stderr.txt
+      - name: check on failures
+        if : steps.exec-tests.outcome != 'success'
+        run: exit 1
 
-     steps:
-     - name: Checkout code
-       uses: actions/checkout@v2
-     - name: Install Prerequisites
-       run: sudo ./CI/install-prerequisites-manually.sh
-     - name: Install AI-CLI
-       run: | 
-         sudo make install && source /etc/environment
+  publish:
+    runs-on: ubuntu-latest
+    needs: test-ci
+    if: ${{ needs.test-ci.result == 'success' }}
 
-     - name: Build artifact
-       run: sudo make build
-     - name: Upload artifact
-       uses: actions/upload-artifact@v2
-       with:
-         name: ai-cli.deb
-         path: src.deb 
-         
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Prerequisites
+        run: sudo ./CI/install-prerequisites-manually.sh
+      - name: Install AI-CLI
+        run: | 
+          sudo make install && source /etc/environment
+      - name: Build artifact
+        run: sudo make build
+      - name: Upload artifact
+        id: upload-artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ai-cli.deb
+          path: src.deb 
+
       # Upload the artifact to the release
       - name: Get Release ID
         id: get_release
