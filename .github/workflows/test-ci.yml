@@ -1,5 +1,7 @@
 name: test-ci
-on: [push]
+on: 
+  release:
+    released
 jobs:
    test-ci:
       runs-on: ubuntu-latest
@@ -25,3 +27,24 @@ jobs:
        - name: check on failures
          if : steps.exec-tests.outcome != 'success'
          run: exit 1
+   publish:
+     runs-on: ubuntu-latest
+     need: test-ci
+     if: ${{ needs.test-ci.result == 'success' }}
+
+     steps:
+     - name: Checkout code
+       uses: actions/checkout@v2
+     - name: Install Prerequisites
+       run: sudo ./CI/install-prerequisites-manually.sh
+     - name: Install AI-CLI
+       run: | 
+         sudo make install && source /etc/environment
+
+     - name: Build artifact
+       run: sudo make build
+     - name: Upload artifact
+       uses: actions/upload-artifact@v2
+       with:
+         name: ai-cli.deb
+         path: src.deb 
