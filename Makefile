@@ -18,9 +18,12 @@ help:
 		| sort \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "[36m%-30s[0m %s", $$1, $$2}'
 
-install: ## install ai-cli
+build:
 	echo $$(git rev-parse --verify HEAD) > src/etc/ai-cli/version 
 	dpkg-deb -b src
+	
+
+install: build  ## install ai-cli
 	dpkg -i src.deb
 	rm src.deb
 
