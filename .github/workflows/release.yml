@@ -62,3 +62,4 @@ jobs:
           asset_path: ${{ steps.upload-artifact.outputs.artifact_path }}
           asset_name: ai-cli.deb
           asset_content_type: application/octet-stream
+
