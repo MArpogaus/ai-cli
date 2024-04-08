@@ -17,9 +17,9 @@ Docker containers are used to manage dependencies and isolate different projects
  - Manage project dependecies in differnet docker images
  - Separate users
  - [Jupyter Lab](https://github.com/jupyterlab/jupyterlab) integration
- - Run MLflow projects with one command
+ - Run [MLflow](https://mlflow.org/docs/latest/projects.html) projects with one command
  - Management of [CML runners](https://github.com/iterative/cml) for differnet git repositories
- - Conda support using Mamba
+ - Conda support using [Mamba](https://mamba.readthedocs.io/en/latest/)
  - GPU support with CUDA
  - Service based domain names using nginx reverse proxy
 
@@ -29,10 +29,12 @@ Use `sudo make install` to install ai-cli system-wide. Each user has to execute 
 
 ### Step-By-Step Instructions
 
+You need to follow _Install_, _System-Wide_ and _User_ _Configuration_ for a working install. Tested on Ubuntu 20.04.
+
 **Install**
 1. Install dependencies:  `sudo apt-get install git make dpkg apache2-utils`
 2. Install `docker-ce` from [docker website](https://docs.docker.com/engine/install/ubuntu/)
-3. Install `docker-compose v2` from [github](https://github.com/docker/compose/releases) (move the executable to `/usr/local/bin/docker-compose` for example)
+3. Install `docker-compose v2` from [github](https://github.com/docker/compose/releases) (move the executable to `/usr/local/bin/docker-compose`, and `sudo chmod +x /usr/local/bin/docker-compose` for example)
 4. Install ai-cli: `git clone https://github.com/MArpogaus/ai-cli.git && cd ai-cli && sudo make install`
 
 Note:
@@ -40,12 +42,13 @@ Note:
 
 **System-Wide Configuration**
 
-Open `/etc/ai-cli/config` and edit 
- - DVC_DATA
- - MLFLOW_DATA (should contain ${USER} for user destinction)
+Open `/etc/ai-cli/config` and edit: 
+ - DVC_DATA (should exist)
+ - MLFLOW_DATA (must exist, should contain ${USER} for user destinction) User needs to have read/write permissions, e.g. using `chown $USER:$USER PATH` command
  - CERTS_PATH (should contain .pem, .crt .key files for ssl)
- - URLNAME (can be left as localhost if desired)
- - DEFAULT_HOST (can be left as error.localhost if desired)
+ - URLNAME (may be left as localhost if desired)
+ - DEFAULT_HOST (may be left as error.localhost if desired)
+
 to reflect respective values of your system 
 
 Configure a first user like below and start reverse proxy: `ai-cli start-proxy`. _This needs to be invoked in order to  reach exposed web services like jupyter._
@@ -54,8 +57,8 @@ Configure a first user like below and start reverse proxy: `ai-cli start-proxy`.
 
 The following needs to be done for _every_ new user in order to use `ai-cli`.
 
-1. Every user that should run ai-cli needs to be added to the `docker` group to not require root. You might need to log-in again or even restart for the change to apply.
-2. Every user needs to have a valid (global) git configuration (email and name) set.
+1. Every user that should run ai-cli needs to be added to the `docker` group to not require root. You might need to log-in again or even restart for the change to apply. (e.g. `sudo usermod -aG docker $USER`)
+2. Every user needs to have a valid (global) git identity (email and name) set. (e.g. `git config --global user.name "John Doe"` and `git config --global user.email johndoe@example.com`)
 3. Execute `ai-cli init` for every new user to setup workspace and build user containers.
 
 `ai-cli` can now be used by the new user for example by starting a jupyter server with `ai-cli lab`. Make sure the reverse proxy is running as described above before trying to access jupyter.
@@ -113,17 +116,16 @@ Now `ai-cli` is ready to be used, examples are provided below.
 
 ### Example commands
 
-Assume a mlflow project at current working directory:
+Assume a mlflow project at current working directory and a started mlflow server:
 
 | comand                                                                                                            | comment                                                                                 |
 |-------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | `ai-cli lab`                                                                                                      | opens jupyter lab at https://[USER]-lab.[HOST]. Use token from command output to login. |
 | `ai-cli start-mlflow`                                                                                             | opens mlflow server at https://[USER]-mlflow.[HOST]. Can be secured with password       |
 | `ai-cli bash`                                                                                                     | open bash for local project in docker image.                                            |
-| --- legacy ---                                                                                                    | --- ---                                                                                 |
-| `ai-cli -e .env run .`                                                                                            | with .env as defautl environment file                                                   |
-| `ai-cli -e the_envir run-from-git`                                                                                | with MLFLOW_GIT_PROJECT defined                                                         |
-| `ai-cli run-from-git "https://<token>:<password>@<uri>#<path/to/MLProject (optional)> -v <branch or commit hash>` |                                                                                         |
+| `ai-cli -e .env run .`                                                                                            | with .env as default environment file, need MLFLOW_EXPERIMENT_NAME defined                                                   |
+| `ai-cli -e the_envir run-from-git`                                                                                | with additionally MLFLOW_GIT_PROJECT (git https url) defined                                                         |
+| `ai-cli run-from-git "https://<token>:<password>@<uri>#<path/to/MLProject (optional)> -v <branch or commit hash>` | directly pass url, set name with -n NAME                                                                                       |
 
 ## Cuda Support
 
