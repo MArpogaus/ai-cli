@@ -59,7 +59,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ steps.upload-artifact.outputs.artifact_path }}
+          asset_path: src.deb
           asset_name: ai-cli.deb
           asset_content_type: application/octet-stream
 
