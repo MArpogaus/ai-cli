@@ -43,7 +43,7 @@ jobs:
         run: | 
           sudo make install && source /etc/environment
       - name: Build artifact
-        run: sudo make build
+        run: sudo make build -e VERSION=${{ github.REF_NAME }}
       - name: Upload artifact
         id: upload-artifact
         uses: actions/upload-artifact@v2

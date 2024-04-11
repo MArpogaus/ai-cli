@@ -13,13 +13,15 @@
 ##
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+VERSION ?= $$(git rev-parse --verify HEAD)
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| sort \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "[36m%-30s[0m %s", $$1, $$2}'
 
 build:
-	echo $$(git rev-parse --verify HEAD) > src/etc/ai-cli/version 
+	echo $(VERSION) > src/etc/ai-cli/version 
 	dpkg-deb -b src
 	
 
