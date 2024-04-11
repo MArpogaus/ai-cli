@@ -21,8 +21,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
     SHELL=/bin/bash \
     PATH="${CONDA_DIR}/bin:${PATH}"
 
+RUN apt-get update && apt-get install -y libpq-dev
 ARG MLFLOW_VERSION
-RUN pip install mlflow==$MLFLOW_VERSION
+RUN pip install mlflow==$MLFLOW_VERSION psycopg2-binary
 
 WORKDIR /app
 
