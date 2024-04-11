@@ -57,6 +57,32 @@ services:
     depends_on:
       - db
 
+  server_nodb:
+    image: ai-cli/${USER}:mlflow
+    user: $DOCKER_USER
+    container_name: ${USER}-mlflow-nodb-server
+    command:
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --backend-store-uri
+      - file:///mlruns
+      - --default-artifact-root
+      - file:///mlruns
+    volumes:
+      - ${MLFLOW_DATA}:/mlruns
+      - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
+    environment:
+      VIRTUAL_HOST: ${USER}-mlflow-nodb.${URLNAME}
+      VIRTUAL_PORT: ${MLFLOWPORT}
+      SSL_POLICY: Mozilla-Modern
+      HSTS: 'max-age=31536000; includeSubDomains; preload'
+      CERT_NAME: shared
+    networks:
+      - mlflow_bridge
+      - proxy_net
+
 networks:
   mlflow_bridge:
     external: true

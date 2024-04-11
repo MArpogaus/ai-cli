@@ -490,7 +490,9 @@ export URLNAME
 export HTPASSWD_PATH
 export CERTS_PATH
 export DEFAULT_HOST
-
+export POSTGRES_PASSWORD=dbpass
+export POSTGRES_DB=dbaicli
+export POSTGRES_USER=dbuser
 # show docker info ####################################################################
 echo "INFO: using runtime $RUNTIME"
 [ $GPUS ] && echo "INFO: using gpus '$GPUS'"
@@ -504,19 +506,19 @@ fi
 case ${CMD} in
 init) # initialize this script for your user
 	init ;;
-start-mlflow) # start mlflow server
+start-mlflow) # start mlflow server append "nodb" to start without database backend
 	basic_auth "$MLFLOW_VIRTUAL_HOST"
-	export POSTGRES_PASSWORD=dbpass
-	export POSTGRES_DB=dbaicli
-	export POSTGRES_USER=dbuser
-	dc server up -d
+	if [ "${@: -1}" = "nodb" ]; then
+		dc server up -d server_nodb
+	else
+		dc server up -d server
+	fi
 	;;
 stop-mlflow) # stop mlflow server
 	dc server down ;;
 restart-mlflow) # restart mlflow server
 	dc server down
-	ai-cli build-server
-	dc server up -d
+	dc server up -d --force-recreate
 	;;
 start-proxy) # start nginx reverse proxy
 	dc proxy up -d --force-recreate
