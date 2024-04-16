@@ -25,7 +25,7 @@ Docker containers are used to manage dependencies and isolate different projects
 
 ## Setup
 
-Use `sudo make install` to install ai-cli system-wide. Each user has to execute `ai-cli init` before their first usage. To reach services online, the reverse proxy needs to be started with `ai-cli start-proxy` once, globally.
+Download the latest release and install with `dpkg -i ai-cli.deb` or clone the repository and execute `sudo make install` to install ai-cli system-wide. Each user has to execute `ai-cli init` before their first usage. To reach services online, the reverse proxy needs to be started with `ai-cli start-proxy` once, globally.
 
 ### Step-By-Step Instructions
 
