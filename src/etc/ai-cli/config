@@ -13,3 +13,6 @@ PYTHON_VERSION=3.10.*
 URLNAME=localhost
 DEFAULT_HOST=error.localhost
 CERTS_PATH=/etc/ssl/certs
+POSTGRES_PASSWORD=dbpass #How relevant is clear password for mlflow?
+POSTGRES_DB=mlflowdb
+POSTGRES_USER=db

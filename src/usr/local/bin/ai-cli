@@ -490,9 +490,9 @@ export URLNAME
 export HTPASSWD_PATH
 export CERTS_PATH
 export DEFAULT_HOST
-export POSTGRES_PASSWORD=dbpass
-export POSTGRES_DB=dbaicli
-export POSTGRES_USER=dbuser
+export POSTGRES_PASSWORD
+export POSTGRES_DB
+export POSTGRES_USER
 # show docker info ####################################################################
 echo "INFO: using runtime $RUNTIME"
 [ $GPUS ] && echo "INFO: using gpus '$GPUS'"

@@ -18,7 +18,7 @@ version: '3'
 services:
   db:
     image: postgres:alpine
-    container_name: aiclidb
+    container_name: ${USER}_mlflowdb
     restart: always
     volumes:
       - ${MLFLOW_DATA}/pgdata:/pgdata
@@ -39,7 +39,7 @@ services:
       - --host
       - 0.0.0.0
       - --backend-store-uri
-      - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@aiclidb:5432/${POSTGRES_DB}
+      - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${USER}_mlflowdb:5432/${POSTGRES_DB}
       - --default-artifact-root
       - file:///mlruns
     volumes:
