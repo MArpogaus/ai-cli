@@ -506,7 +506,7 @@ fi
 case ${CMD} in
 init) # initialize this script for your user
 	init ;;
-start-mlflow) # start mlflow server append "nodb" to start without database backend
+start-mlflow) # start mlflow server provide "nodb" to start without database backend
 	basic_auth "$MLFLOW_VIRTUAL_HOST"
 	if [ "${@: -1}" = "nodb" ]; then
 		dc server up -d server_nodb
@@ -517,8 +517,8 @@ start-mlflow) # start mlflow server append "nodb" to start without database back
 stop-mlflow) # stop mlflow server
 	dc server down ;;
 restart-mlflow) # restart mlflow server
-	dc server down
-	dc server up -d --force-recreate
+	ai-cli stop-mlflow
+	ai-cli start-mlflow
 	;;
 start-proxy) # start nginx reverse proxy
 	dc proxy up -d --force-recreate
