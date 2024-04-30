@@ -193,7 +193,7 @@ Now the runner is ready to pick up your jobs.
 
 Parts of this work have been funded by the Federal Ministry for the Environment, Nature Conservation and Nuclear Safety due to a decision of the German Federal Parliament (AI4Grids: 67KI2012A).
 
-[ci-shiled]: https://github.com/MArpogaus/ai-cli/actions/workflows/test-ci.yml/badge.svg?style=flat-square
+[ci-shiled]: https://github.com/MArpogaus/ai-cli/actions/workflows/release.yml/badge.svg?style=flat-square
 [ci-url]: https://github.com/MArpogaus/ai-cli/actions
 [contributors-shield]: https://img.shields.io/github/contributors/marpogaus/ai-cli.svg?style=flat-square
 [contributors-url]: https://github.com/marpogaus/ai-cli/graphs/contributors
