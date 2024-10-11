@@ -520,11 +520,17 @@ restart-mlflow) # restart mlflow server
 	ai-cli stop-mlflow
 	ai-cli start-mlflow
 	;;
+dbg-mlflow) # execute docker compose commands on the mlflow for debugging and maintenance
+	dc server $*
+	;;
 start-proxy) # start nginx reverse proxy
 	dc proxy up -d --force-recreate
 	;;
 stop-proxy) # stop nginx reverse proxy
 	dc proxy down
+	;;
+dbg-proxy) # execute docker compose commands on the proxy server for debugging and maintenance
+	dc proxy $*
 	;;
 status) # show status of your environment
 	show_status ;;
