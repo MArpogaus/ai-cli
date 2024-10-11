@@ -62,7 +62,7 @@ show_help() {
 dc() {
 	FILE=$1
 	shift
-	docker-compose --project-name $USER-$FILE \
+	${COMPOSE_CMD:-docker compose} --project-name $USER-$FILE \
 		--file "${DOCKER_COMPOSE_PATH}/${FILE}.docker-compose.yaml" \
 		$*
 }
@@ -310,7 +310,7 @@ show_mlflow_status() {
 show_proxy_status() {
 	status_nginx=$(docker container ps --filter "name=nginx" --filter "status=running" | tail -n+2)
 	status_gen=$(docker container ps --filter "name=docker_gen" --filter "status=running" | tail -n+2)
-	
+
 	echo "Proxy status:"
 	if [ "$status_nginx" ]; then
 		echo "  nginx      online"
@@ -324,7 +324,7 @@ show_proxy_status() {
 		echo "  docker_gen offline"
 	fi
 
-	if [ -z  "$status_nginx" ] || [ -z "$status_gen" ]; then
+	if [ -z "$status_nginx" ] || [ -z "$status_gen" ]; then
 		echo "WARNING: Services might not be available online, use \`ai-cli start-proxy\` to start them."
 	fi
 }
