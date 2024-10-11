@@ -64,7 +64,7 @@ dc() {
 	shift
 	${COMPOSE_CMD:-docker compose} --project-name $USER-$FILE \
 		--file "${DOCKER_COMPOSE_PATH}/${FILE}.docker-compose.yaml" \
-		$*
+		"$@"
 }
 
 # docker_run PARAM runs PARAM as command with workspace.docker-compose.yaml
@@ -76,7 +76,7 @@ docker_run() {
 	echo "INFO: Using image ${IMAGE_NAME}"
 	dc workspace --project-directory "$PWD" \
 		run $RUN_ARGS \
-		$SERVICE_NAME "$*"
+		$SERVICE_NAME "$@"
 }
 
 build_image_name() {
@@ -427,7 +427,7 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
 		valid_c=true
 		invalid_cuda_tokens=("reset-password" "version" "status" "restart-mlflow" "stop-mlflow" "start-mlflow" "init")
 		argument_tokens=("$@")
-		for token in ${argument_tokens[@]}; do
+		for token in "${argument_tokens[@]}"; do
 			# test if any token is invalid (https://stackoverflow.com/a/41395983)
 			if [[ " ${invalid_cuda_tokens[*]} " == *"$token"* ]]; then
 				valid_c=false
@@ -461,7 +461,7 @@ done
 shift $((OPTIND - 1)) # to skip option arguments when evaulating command
 
 # CLI args for docker-compose run
-for v in ${RUN_VOLUMES[@]}; do
+for v in "${RUN_VOLUMES[@]}"; do
 	RUN_ARGS+=" -v $v"
 done
 if [[ -n $MLFLOW_EXPERIMENT_NAME ]]; then
@@ -521,7 +521,7 @@ restart-mlflow) # restart mlflow server
 	ai-cli start-mlflow
 	;;
 dbg-mlflow) # execute docker compose commands on the mlflow for debugging and maintenance
-	dc server $*
+	dc server "$@"
 	;;
 start-proxy) # start nginx reverse proxy
 	dc proxy up -d --force-recreate
@@ -530,7 +530,7 @@ stop-proxy) # stop nginx reverse proxy
 	dc proxy down
 	;;
 dbg-proxy) # execute docker compose commands on the proxy server for debugging and maintenance
-	dc proxy $*
+	dc proxy "$@"
 	;;
 status) # show status of your environment
 	show_status ;;
@@ -597,7 +597,7 @@ notebook) # start jupyter notebook server
 	export MLFLOW_LOCAL_PROJECT
 	echo "INFO: Running notebook server in: $MLFLOW_LOCAL_PROJECT"
 	echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-	docker_run jupyter $(select_image workspace) $JUPYTER_CMD $*
+	docker_run jupyter $(select_image workspace) $JUPYTER_CMD "$@"
 	;;
 lab) # start jupyter lab server
 	JUPYTER_VIRTUAL_HOST=$(disambiguate_host $LAB_VIRTUAL_HOST)
@@ -605,7 +605,7 @@ lab) # start jupyter lab server
 	export MLFLOW_LOCAL_PROJECT
 	echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
 	echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
-	docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD $*
+	docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD "$@"
 	;;
 runner) # start cml runner for repo
 	args=("$@")
@@ -638,7 +638,7 @@ exec) # execute @PROGRAMM inside container
 		exit 1
 	fi
 	export MLFLOW_LOCAL_PROJECT
-	docker_run workspace $(select_image workspace) $*
+	docker_run workspace $(select_image workspace) "$@"
 	;;
 run) # run MLProject from @PATH inside container
 	if [[ $# == 0 ]]; then
@@ -654,7 +654,7 @@ run) # run MLProject from @PATH inside container
 	export MLFLOW_LOCAL_PROJECT
 	echo "INFO: Running MLProject from $MLFLOW_LOCAL_PROJECT"
 	echo "INFO: Executed Command:  mlflow run $*"
-	docker_run workspace $(select_image workspace) mlflow run $*
+	docker_run workspace $(select_image workspace) mlflow run "$@"
 	;;
 run-from-git) # run MLProject from git repo at @URI inside container
 	if [[ $# != 0 && -z $MLFLOW_GIT_PROJECT ]]; then
