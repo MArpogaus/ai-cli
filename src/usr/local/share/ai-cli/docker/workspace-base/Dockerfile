@@ -14,7 +14,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ARG BASE_WORKSPACE_IMAGE_TAG
-FROM jupyter/minimal-notebook:${BASE_WORKSPACE_IMAGE_TAG:-ubuntu-22.04}
+FROM quay.io/jupyter/minimal-notebook:${BASE_WORKSPACE_IMAGE_TAG:-ubuntu-22.04}
 
 ARG ARG_NB_USER \
     ARG_NB_UID \
@@ -23,20 +23,20 @@ ARG ARG_NB_USER \
     MLFLOW_VERSION \
     ARG_HOME
 
-ENV NB_USER=${ARG_NB_USER} \
-    NB_UID=${ARG_NB_UID} \
-    NB_GID=${ARG_NB_GID} \
-    HOME=${ARG_HOME} \
-    MLFLOW_CONDA_CREATE_ENV_CMD=mamba
-
 RUN set -x && \
     rm ${CONDA_DIR}/conda-meta/pinned && \
     mamba install --yes \
     python>="${PYTHON_VERSION}" \
     mlflow>="${MLFLOW_VERSION}" \
     'nb_conda_kernels' && \
-    mamba list python | grep '^python ' | tr -s ' ' | cut -d ' ' -f 1,2 >> "${CONDA_DIR}/conda-meta/pinned" && \
+    mamba list -f '^python$' -e | tail -n 1 >> "${CONDA_DIR}/conda-meta/pinned" && \
     mamba clean --all -f -y
+
+ENV NB_USER=${ARG_NB_USER} \
+    NB_UID=${ARG_NB_UID} \
+    NB_GID=${ARG_NB_GID} \
+    HOME=${ARG_HOME} \
+    MLFLOW_CONDA_CREATE_ENV_CMD=mamba
 
 # switch to root to fix permissions for local user and add entrypoint.sh
 USER root
