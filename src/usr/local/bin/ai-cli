@@ -21,7 +21,7 @@ set -e
 # Function definitions #########################################################
 show_help() {
     DSC_PATTERN="[[:alnum:][:blank:]_\.\(\)\$\-\,\'<>]"
-    DOC_PATTERN="#[[:blank:]]*(${DSC_PATTERN} *(@[A-Z]{3,}@?)?${DSC_PATTERN} *)"
+    DOC_PATTERN="#[[:blank:]]*(${DSC_PATTERN}*(@[A-Z]{3,}@?)?${DSC_PATTERN}*)"
     OPTIONS_PATTERN="^[[:blank:]]*([a-z])\)[[:blank:]]*${DOC_PATTERN}$"
     OPTIONS=$(grep -P "${OPTIONS_PATTERN}" "$0")
     COMMANDS_PATTERN="^[[:blank:]]*([a-z\-]{3,})\)[[:blank:]]*${DOC_PATTERN}$"
@@ -34,7 +34,7 @@ show_help() {
     echo "Options:"
     IFS=$'
 '
-    for o in "${OPTIONS}" 'h)#Show help'; do
+    for o in ${OPTIONS} 'h)#Show help'; do
         [[ ${o} =~ ${OPTIONS_PATTERN} ]]
         opt=${BASH_REMATCH[1]}
         arg=$(tr -d @ <<<"${BASH_REMATCH[3]}")
