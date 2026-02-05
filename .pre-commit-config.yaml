@@ -1,0 +1,36 @@
+repos:
+- hooks:
+  - id: check-added-large-files
+  - id: check-executables-have-shebangs
+  - id: check-merge-conflict
+  - id: check-shebang-scripts-are-executable
+  - id: check-toml
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+  - id: trailing-whitespace
+  repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+- hooks:
+  - args:
+    - --autofix
+    - --indent
+    - '2'
+    id: pretty-format-yaml
+  - args:
+    - --autofix
+    id: pretty-format-toml
+  - args:
+    - --autofix
+    id: pretty-format-ini
+  repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.16.0
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: v0.11.0.1
+  hooks:
+  - id: shellcheck
+- repo: https://github.com/scop/pre-commit-shfmt
+  rev: v3.12.0-2
+  hooks:
+    - id: shfmt
+      args: [--simplify, --write, --indent, "4"]
