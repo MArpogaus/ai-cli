@@ -39,6 +39,7 @@ services:
     working_dir: /app
     env_file:
       - ${MLFLOW_ENV_FILE}
+    ipc: host
     networks:
       - mlflow_bridge
 
@@ -60,6 +61,7 @@ services:
       SSL_POLICY: Mozilla-Modern
       HSTS: 'max-age=31536000; includeSubDomains; preload'
       CERT_NAME: shared
+    ipc: host
     networks:
       - mlflow_bridge
       - proxy_net
