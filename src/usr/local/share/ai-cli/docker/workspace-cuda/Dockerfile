@@ -27,12 +27,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${NVARCH} /" > /etc/apt/sources.list.d/cuda.list && \
     apt-get purge --autoremove -y curl \
     && rm -rf /var/lib/apt/lists/*
-    
+
 # install cuda from repo
 RUN apt-get update && apt-get install -y --no-install-recommends \
        #cuda-cudart-${CMAJ}-${CMIN}=${NV_CUDA_CUDART_VERSION} \
        #${NV_CUDA_COMPAT_PACKAGE} \
-       ${NV_CUDNN_PACKAGE} \  
+       ${NV_CUDNN_PACKAGE} \
        cuda-libraries-${CMAJ}-${CMIN}=${NV_CUDA_LIB_VERSION} \
        #${NV_LIBNPP_PACKAGE} \
        #cuda-nvtx-${CMAJ}-${CMIN}=${NV_NVTX_VERSION} \

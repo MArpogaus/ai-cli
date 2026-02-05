@@ -1,4 +1,3 @@
-#!/bin/bash
 #    AI-CLI Simplifying AI Experiments
 #    Copyright (C) 2022  Marcel Arpogaus, Julian Jandeleit
 #
@@ -26,4 +25,3 @@ ARG MLFLOW_VERSION
 RUN pip install mlflow==$MLFLOW_VERSION psycopg2-binary
 
 WORKDIR /app
-

@@ -13,40 +13,39 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-version: '2'
-
 services:
 
   workspace:
     image: $IMAGE_NAME
     user: ${DOCKER_USER}
     group_add:
-     - ${ADDITIONAL_GROUP:-users}
+    - ${ADDITIONAL_GROUP:-users}
     container_name: ${USER}-mlflow-run
     runtime: ${RUNTIME}
     volumes: &mounted_volumes
-      - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
-      - ${MLFLOW_DATA}:/mlruns
-      - ${HOME_PATH}:/home/${USER}
-      - ${EXTENSION_PATH}:/opt/conda/share/jupyter/lab/extensions
-      - /etc/passwd:/etc/passwd:ro
-      - /etc/group:/etc/group:ro
-      - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
+    - ${MLFLOW_LOCAL_PROJECT:-empty}:/app
+    - ${MLFLOW_DATA}:/mlruns
+    - ${HOME_PATH}:/home/${USER}
+    - ${EXTENSION_PATH}:/opt/conda/share/jupyter/lab/extensions
+    - /etc/passwd:/etc/passwd:ro
+    - /etc/group:/etc/group:ro
+    - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
     environment:
-     MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
-     CONDA_ENVS_PATH: ${CONDA_DIR}
-     NVIDIA_VISIBLE_DEVICES: "${GPUS}"
+      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
+      CONDA_ENVS_PATH: ${CONDA_DIR}
+      NVIDIA_VISIBLE_DEVICES: ${GPUS}
     working_dir: /app
     env_file:
-      - ${MLFLOW_ENV_FILE}
+    - ${MLFLOW_ENV_FILE}
+    ipc: host
     networks:
-      - mlflow_bridge
+    - mlflow_bridge
 
   jupyter:
     image: $IMAGE_NAME
     user: ${DOCKER_USER}
     group_add:
-     - ${ADDITIONAL_GROUP:-users}
+    - ${ADDITIONAL_GROUP:-users}
     container_name: ${USER}-jupyter
     runtime: ${RUNTIME}
     working_dir: /home/${USER}
@@ -54,36 +53,16 @@ services:
     environment:
       MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
       CONDA_ENVS_PATH: ${CONDA_DIR}
-      NVIDIA_VISIBLE_DEVICES: "${GPUS}"
+      NVIDIA_VISIBLE_DEVICES: ${GPUS}
       VIRTUAL_HOST: ${JUPYTER_VIRTUAL_HOST}
       VIRTUAL_PORT: ${JUPYTERPORT}
       SSL_POLICY: Mozilla-Modern
-      HSTS: 'max-age=31536000; includeSubDomains; preload'
+      HSTS: max-age=31536000; includeSubDomains; preload
       CERT_NAME: shared
+    ipc: host
     networks:
-      - mlflow_bridge
-      - proxy_net
-
-  runner:
-    image: $IMAGE_NAME
-    user: ${DOCKER_USER}
-    group_add:
-     - ${ADDITIONAL_GROUP:-users}
-    container_name: ${USER}-runner
-    runtime: ${RUNTIME}
-    working_dir: /home/${USER}
-    volumes: 
-     - ${MLFLOW_DATA}:/mlruns
-     - ${HOME_PATH}:/home/${USER}
-     - /etc/passwd:/etc/passwd:ro
-     - /etc/group:/etc/group:ro
-    environment:
-      MLFLOW_TRACKING_URI: http://server:${MLFLOWPORT}
-      CONDA_ENVS_PATH: ${CONDA_DIR}
-      NVIDIA_VISIBLE_DEVICES: "${GPUS}"
-    networks:
-     - mlflow_bridge
-     - proxy_net
+    - mlflow_bridge
+    - proxy_net
 
 volumes:
   empty:

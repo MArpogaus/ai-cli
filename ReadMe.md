@@ -18,7 +18,6 @@ Docker containers are used to manage dependencies and isolate different projects
  - Separate users
  - [Jupyter Lab](https://github.com/jupyterlab/jupyterlab) integration
  - Run [MLflow](https://mlflow.org/docs/latest/projects.html) projects with one command
- - Management of [CML runners](https://github.com/iterative/cml) for differnet git repositories
  - Conda support using [Mamba](https://mamba.readthedocs.io/en/latest/)
  - GPU support with CUDA
  - Service based domain names using nginx reverse proxy
@@ -42,14 +41,14 @@ Note:
 
 **System-Wide Configuration**
 
-Open `/etc/ai-cli/config` and edit: 
+Open `/etc/ai-cli/config` and edit:
  - DVC_DATA (should exist)
  - MLFLOW_DATA (must exist, should contain ${USER} for user destinction) User needs to have read/write permissions, e.g. using `chown $USER:$USER PATH` command
  - CERTS_PATH (should contain .pem, .crt .key files for ssl)
  - URLNAME (may be left as localhost if desired)
  - DEFAULT_HOST (may be left as error.localhost if desired)
 
-to reflect respective values of your system 
+to reflect respective values of your system
 
 Configure a first user like below and start reverse proxy: `ai-cli start-proxy`. _This needs to be invoked in order to  reach exposed web services like jupyter._
 
@@ -68,7 +67,7 @@ The following needs to be done for _every_ new user in order to use `ai-cli`.
     ai-cli [OPTIONS] COMMAND [ARGS...]
 
 ### Options
-  
+
     -v VOLUME            Specify additional docker VOLUMEs
     -e FILE              Specify environment FILE
     -g GPUS              Enable gpu support. Set specific GPUS, e.g. 0,1 for gpu 0 and 1.
@@ -78,7 +77,7 @@ The following needs to be done for _every_ new user in order to use `ai-cli`.
     -h                   Show help
 
 ### Commands
-  
+
     init                 initialize this script for your user
     start-mlflow         start mlflow server
     stop-mlflow          stop mlflow server
@@ -90,7 +89,6 @@ The following needs to be done for _every_ new user in order to use `ai-cli`.
     bash                 start bash shell inside container
     notebook             start jupyter notebook server
     lab                  start jupyter lab server
-    runner               start cml runner for repo
     exec PROGRAMM        execute PROGRAMM inside container
     run PATH             run MLProject from PATH inside container
     run-from-git URI     run MLProject from git repo at URI inside container
@@ -101,7 +99,7 @@ The following needs to be done for _every_ new user in order to use `ai-cli`.
 ### Overview
 
 `ai-cli` is based on docker images/containers. The list of images associated to a user can be seen with `ai-cli status`.
-The image ai-cli/<USER>:workspace is used by default. 
+The image ai-cli/<USER>:workspace is used by default.
 A different associated image can selected by specifying the -t flag.
 All below commands need to be executed as the user that should use the respective feature.
 
@@ -130,40 +128,17 @@ Assume a mlflow project at current working directory and a started mlflow server
 ## Cuda Support
 
 `ai-cli` is built to support tensorflow with cuda.
-To use cuda, a cuda-enabled image is necessary. 
+To use cuda, a cuda-enabled image is necessary.
 To create a cuda image, use the build command and specify the desired cuda version using the `-c` switch.
 `ai-cli -c 11.2 build`.
 
-For the cuda container to use the gpu, add the `-g` option when using any command to actually include gpus that cuda can use. 
+For the cuda container to use the gpu, add the `-g` option when using any command to actually include gpus that cuda can use.
 This makes the specified gpu(s) available and switches the runtime to "nvidia".
 Note, that docker-nvidia-runtime needs to be set up correctly beforehand.
 
 For example `ai-cli -g 0 -c 11.2 bash` opens a bash command line with inside the container, exposing gpu "0" with support for cuda 11.2. Note, that the images for cuda 11.2 need to be built beforhand as stated above.
 It can be verified that the gpu is used, using `nvidia-smi` inside the container. Note, that the cuda version shown by nvidia-smi does not necessarily represent the correct version because of differences between driver API and runtime API version.
 Also, the command is not installed by default.
-
-## CML Runner
-
-`ai-cli` supports starting a CML runner locally for your CI/CD Workflow.
-
-Here is how to use `ai-cli runner GIT-ORIGIN-HTTPS ACCESS-TOKEN`.
-
-1. Create access token for your project (as owner, scope: api in gitlab) or personal access token.
-2. Enable CI for your repository. (Settings->General->Visibility, project features, permissions->Repository->CI/CD->Save Changes in gitlab)
-3. Configure pipeline (.gitlab-ci.yml, in gitlab). For the local runner to pickup a job, the job needs to have the tag `ai-cli`.
-   For Example:
-   ```yml
-   test:
-    tags:
-     - ai-cli
-    script:
-     - echo "Hello World" >> report.md
-     - cml comment create report.md
-   ```
-4. Copy the https clone link for your repository. Start your local runner using this link.
-
-Now the runner is ready to pick up your jobs.
-
 
 ## Troubleshooting
 
@@ -175,7 +150,7 @@ Now the runner is ready to pick up your jobs.
 
     AI-CLI Simplifying AI Experiments
     Copyright (C) 2022  Marcel Arpogaus, Julian Jandeleit
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or

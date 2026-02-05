@@ -13,75 +13,73 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-version: '3'
-
 services:
   db:
     image: postgres:alpine
     container_name: ${USER}_mlflowdb
     restart: always
     volumes:
-      - ${MLFLOW_DATA}/pgdata:/pgdata
+    - ${MLFLOW_DATA}/pgdata:/pgdata
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       PGDATA: /pgdata
     networks:
-      - mlflow_bridge
+    - mlflow_bridge
   server:
     image: ai-cli/${USER}:mlflow
     user: $DOCKER_USER
     container_name: ${USER}-mlflow-server
     command:
-      - mlflow
-      - server
-      - --host
-      - 0.0.0.0
-      - --backend-store-uri
-      - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${USER}_mlflowdb:5432/${POSTGRES_DB}
-      - --default-artifact-root
-      - file:///mlruns
+    - mlflow
+    - server
+    - --host
+    - 0.0.0.0
+    - --backend-store-uri
+    - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${USER}_mlflowdb:5432/${POSTGRES_DB}
+    - --default-artifact-root
+    - file:///mlruns
     volumes:
-      - ${MLFLOW_DATA}:/mlruns
-      - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
+    - ${MLFLOW_DATA}:/mlruns
+    - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
     environment:
       VIRTUAL_HOST: ${USER}-mlflow.${URLNAME}
       VIRTUAL_PORT: ${MLFLOWPORT}
       SSL_POLICY: Mozilla-Modern
-      HSTS: 'max-age=31536000; includeSubDomains; preload'
+      HSTS: max-age=31536000; includeSubDomains; preload
       CERT_NAME: shared
     networks:
-      - mlflow_bridge
-      - proxy_net
+    - mlflow_bridge
+    - proxy_net
     depends_on:
-      - db
+    - db
 
   server_nodb:
     image: ai-cli/${USER}:mlflow
     user: $DOCKER_USER
     container_name: ${USER}-mlflow-nodb-server
     command:
-      - mlflow
-      - server
-      - --host
-      - 0.0.0.0
-      - --backend-store-uri
-      - file:///mlruns
-      - --default-artifact-root
-      - file:///mlruns
+    - mlflow
+    - server
+    - --host
+    - 0.0.0.0
+    - --backend-store-uri
+    - file:///mlruns
+    - --default-artifact-root
+    - file:///mlruns
     volumes:
-      - ${MLFLOW_DATA}:/mlruns
-      - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
+    - ${MLFLOW_DATA}:/mlruns
+    - /etc/ai-cli/hooks:/etc/ai-cli/hooks:ro
     environment:
       VIRTUAL_HOST: ${USER}-mlflow-nodb.${URLNAME}
       VIRTUAL_PORT: ${MLFLOWPORT}
       SSL_POLICY: Mozilla-Modern
-      HSTS: 'max-age=31536000; includeSubDomains; preload'
+      HSTS: max-age=31536000; includeSubDomains; preload
       CERT_NAME: shared
     networks:
-      - mlflow_bridge
-      - proxy_net
+    - mlflow_bridge
+    - proxy_net
 
 networks:
   mlflow_bridge:

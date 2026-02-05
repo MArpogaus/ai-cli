@@ -21,9 +21,9 @@ help:
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "[36m%-30s[0m %s", $$1, $$2}'
 
 build:
-	echo $(VERSION) > src/etc/ai-cli/version 
+	echo $(VERSION) > src/etc/ai-cli/version
 	dpkg-deb -b src
-	
+
 
 install: build  ## install ai-cli
 	dpkg -i src.deb

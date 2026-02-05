@@ -1,20 +1,20 @@
-# MLflow-Projekt // Strukturbeispiel 
+# MLflow-Projekt // Strukturbeispiel
 
-Dieser Ordner beschreibt ein Basisprojekt das [MLflow](https://mlflow.org/docs/latest/index.html) in einer [Anaconda](https://www.anaconda.com/)-Umgebung verwendet und eine [Python](https://docs.python.org/3/)-Datei ausführt.    
+Dieser Ordner beschreibt ein Basisprojekt das [MLflow](https://mlflow.org/docs/latest/index.html) in einer [Anaconda](https://www.anaconda.com/)-Umgebung verwendet und eine [Python](https://docs.python.org/3/)-Datei ausführt.
 
 
 ## test.py
 
-Diese beispielhafte Datei startet einen *run* und legt Werte fest die aufgezeichnet("logged") werden sollen. Um `mlflow` zu benutzen muss es in der Python-Datei zuerst importiert werden.  
-    
+Diese beispielhafte Datei startet einen *run* und legt Werte fest die aufgezeichnet("logged") werden sollen. Um `mlflow` zu benutzen muss es in der Python-Datei zuerst importiert werden.
+
     import mlflow
 
-Danach kann der *run* gestartet werden. 
+Danach kann der *run* gestartet werden.
 
 
 ## conda.yaml
 
-Eine YAML formatierte Textdatei um eine Anaconda Umgebung aufzubauen. Die `conda.yaml` besteht aus dem Namen der Umgebung, mehreren Kanälen (`channels`) und einer teils langen Liste an Abhängigkeiten (`dependencies`). Ein [Conda `channel`](https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html) beschreibt einen Ort, an dem viele Software Pakete abgespeichert sind. Die Abhängigkeiten zählen einzelne Bibliotheken und deren Versionen in der Umgebung auf. In den Abhängigkeiten der Anaconda Umgebung ist auch `mlflow` enthalten. 
+Eine YAML formatierte Textdatei um eine Anaconda Umgebung aufzubauen. Die `conda.yaml` besteht aus dem Namen der Umgebung, mehreren Kanälen (`channels`) und einer teils langen Liste an Abhängigkeiten (`dependencies`). Ein [Conda `channel`](https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html) beschreibt einen Ort, an dem viele Software Pakete abgespeichert sind. Die Abhängigkeiten zählen einzelne Bibliotheken und deren Versionen in der Umgebung auf. In den Abhängigkeiten der Anaconda Umgebung ist auch `mlflow` enthalten.
 
 ```YAML
 channels:
@@ -28,12 +28,12 @@ dependencies:
     - mlflow
 ```
 
-Diese `conda.yaml` referenziert sich auf drei Standard channels und installiert den Paketmanager **pip** um damit `mlflow` herunterladen zu können. 
+Diese `conda.yaml` referenziert sich auf drei Standard channels und installiert den Paketmanager **pip** um damit `mlflow` herunterladen zu können.
 
 
 ## MLProject File
 
-Die YAML Datei für MLflow (=`MLProject`) spezifiziert die Umgebung des Projektes. Man kann dem Projekt einen Namen geben, Umgebungen hinzufügen (z.B. Anaconda) und auch Schnittstellen (`entry points`) definieren. Weitere mögliche **Projektumgebungen** sind: 
+Die YAML Datei für MLflow (=`MLProject`) spezifiziert die Umgebung des Projektes. Man kann dem Projekt einen Namen geben, Umgebungen hinzufügen (z.B. Anaconda) und auch Schnittstellen (`entry points`) definieren. Weitere mögliche **Projektumgebungen** sind:
 
 - Docker container environment
 - System environment
