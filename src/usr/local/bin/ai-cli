@@ -79,8 +79,9 @@ docker_run() {
     shift 2
     export IMAGE_NAME
     echo "INFO: Using image ${IMAGE_NAME}"
+    # shellcheck disable=2086
     dc workspace --project-directory "${PWD}" \
-        run "${RUN_ARGS}" \
+        run ${RUN_ARGS} \
         "${SERVICE_NAME}" "$@"
 }
 
