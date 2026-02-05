@@ -18,7 +18,6 @@ Docker containers are used to manage dependencies and isolate different projects
  - Separate users
  - [Jupyter Lab](https://github.com/jupyterlab/jupyterlab) integration
  - Run [MLflow](https://mlflow.org/docs/latest/projects.html) projects with one command
- - Management of [CML runners](https://github.com/iterative/cml) for differnet git repositories
  - Conda support using [Mamba](https://mamba.readthedocs.io/en/latest/)
  - GPU support with CUDA
  - Service based domain names using nginx reverse proxy
@@ -90,7 +89,6 @@ The following needs to be done for _every_ new user in order to use `ai-cli`.
     bash                 start bash shell inside container
     notebook             start jupyter notebook server
     lab                  start jupyter lab server
-    runner               start cml runner for repo
     exec PROGRAMM        execute PROGRAMM inside container
     run PATH             run MLProject from PATH inside container
     run-from-git URI     run MLProject from git repo at URI inside container
@@ -141,29 +139,6 @@ Note, that docker-nvidia-runtime needs to be set up correctly beforehand.
 For example `ai-cli -g 0 -c 11.2 bash` opens a bash command line with inside the container, exposing gpu "0" with support for cuda 11.2. Note, that the images for cuda 11.2 need to be built beforhand as stated above.
 It can be verified that the gpu is used, using `nvidia-smi` inside the container. Note, that the cuda version shown by nvidia-smi does not necessarily represent the correct version because of differences between driver API and runtime API version.
 Also, the command is not installed by default.
-
-## CML Runner
-
-`ai-cli` supports starting a CML runner locally for your CI/CD Workflow.
-
-Here is how to use `ai-cli runner GIT-ORIGIN-HTTPS ACCESS-TOKEN`.
-
-1. Create access token for your project (as owner, scope: api in gitlab) or personal access token.
-2. Enable CI for your repository. (Settings->General->Visibility, project features, permissions->Repository->CI/CD->Save Changes in gitlab)
-3. Configure pipeline (.gitlab-ci.yml, in gitlab). For the local runner to pickup a job, the job needs to have the tag `ai-cli`.
-   For Example:
-   ```yml
-   test:
-    tags:
-     - ai-cli
-    script:
-     - echo "Hello World" >> report.md
-     - cml comment create report.md
-   ```
-4. Copy the https clone link for your repository. Start your local runner using this link.
-
-Now the runner is ready to pick up your jobs.
-
 
 ## Troubleshooting
 

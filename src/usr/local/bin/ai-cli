@@ -400,7 +400,7 @@ while getopts :he:g:n:c:v:i:t:r: flag; do
 	case "${flag}" in
 	v) # Specify additional docker @VOLUME@s
 		# -v is only valid on certain commands
-		valid_commands=("bash run lab notebook runner")
+		valid_commands=("bash run lab notebook")
 		valid_v=false
 		for token in "$@"; do
 			if [[ " ${valid_commands[*]} " =~ " ${token} " ]]; then
@@ -553,12 +553,6 @@ build) # build image from dockerfile
 			--build-arg=MLFLOW_VERSION="$MLFLOW_VERSION" \
 			$DOCKER_COMPOSE_PATH/workspace-base/
 
-		echo "INFO: Building runner"
-		docker build \
-			-t $(build_image_name $IMAGE_PREFIX runner) \
-			--build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace) \
-			"$DOCKER_COMPOSE_PATH"/workspace-dvc/
-
 	else
 		echo "INFO: Building with cuda $CUDA_VERSION"
 		echo "INFO: Building workspace"
@@ -571,11 +565,6 @@ build) # build image from dockerfile
 			--build-arg=CMAJ="$CMAJ" \
 			--build-arg=CMIN="$CMIN" \
 			$DOCKER_COMPOSE_PATH/workspace-cuda/
-
-		docker build \
-			-t $(build_image_name $IMAGE_PREFIX runner $CUDA_VERSION) \
-			--build-arg=BASE_IMAGE=$(build_image_name $IMAGE_PREFIX workspace $CUDA_VERSION) \
-			"$DOCKER_COMPOSE_PATH"/workspace-dvc/
 	fi
 
 	_TAG=$(build_image_name $IMAGE_PREFIX mlflow)
@@ -606,30 +595,6 @@ lab) # start jupyter lab server
 	echo "INFO: Running lab server in: $MLFLOW_LOCAL_PROJECT"
 	echo "      Listening at: https://$JUPYTER_VIRTUAL_HOST"
 	docker_run jupyter $(select_image workspace) $JUPYTER_LAB_CMD "$@"
-	;;
-runner) # start cml runner for repo
-	args=("$@")
-	if [[ ${#args[@]} -ne 2 ]]; then
-		echo "please provide URL and TOKEN"
-		exit 1
-	fi
-	TOKEN_ARG="${args[-1]}"
-	URL_ARG="${args[-2]}"
-	echo "INFO: Providing runner for '$URL_ARG' with token '$TOKEN_ARG'. GPUS: ${GPUS}"
-	GPUOPT=""
-	if [[ -n $GPUS ]]; then
-		GPUOPT="--gpus ${GPUS}"
-	fi
-
-	RUN_ARGS+=" -e REPO_TOKEN=$TOKEN_ARG" # required for runner to comment
-	#RUN_ARGS+=" --user jovyan"
-	docker_run runner $(select_image runner) cml runner launch \
-		--repo="$URL_ARG" \
-		--token="$TOKEN_ARG" \
-		--driver="gitlab" \
-		--labels="local,runner,ai-cli" \
-		--idle-timeout -1
-
 	;;
 exec) # execute @PROGRAMM inside container
 	if [[ $# == 0 ]]; then
