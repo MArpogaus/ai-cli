@@ -5,7 +5,7 @@ set -ex
 echo "CI: Check if command exists"
 type ai-cli
 
-# both init and upgrade are needed to successfully use ai-cli run 
+# both init and upgrade are needed to successfully use ai-cli run
 
 #bash -x ai-cli ai-cli -c11.2 build all
 

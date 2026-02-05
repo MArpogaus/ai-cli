@@ -42,10 +42,9 @@ ENV NB_USER=${ARG_NB_USER} \
 USER root
 RUN chown -R $NB_UID:$NB_GID "${CONDA_DIR}"
 
-COPY entrypoint.sh /entrypoint.sh 
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Switch user to avoid accidental container runs as root
 USER $NB_USER
-
