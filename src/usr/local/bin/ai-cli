@@ -132,7 +132,8 @@ init() {
     echo "INFO: init docker workspace"
     ai-cli build
     echo "INFO: init conda"
-    docker_run workspace "$(select_image workspace)" mamba init &>/dev/null
+    docker_run workspace "$(select_image workspace)" conda init
+    docker_run workspace "$(select_image workspace)" mamba shell init
     echo "INFO: Initialization complete"
     ai-cli status
 }
